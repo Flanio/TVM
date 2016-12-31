@@ -1,0 +1,16 @@
+﻿<Window x:Class="TVM.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SelfSelling" WindowState="Maximized" Height="768" Width="1200" WindowStyle="None">
+    <Viewbox>
+    <Grid>
+        <Button Background="AliceBlue" Content="360自行车" FontSize="30" HorizontalAlignment="Left" Margin="1,100,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_360"/>
+        <Button Background="AliceBlue" Content="VR体验" FontSize="30" HorizontalAlignment="Left" Margin="1,200,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_FullSound"/>
+        <Button Background="AliceBlue" Content="全息音效" FontSize="30" HorizontalAlignment="Left" Margin="1,300,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_VR"/>
+        <Image HorizontalAlignment="Left" Height="146" Margin="250,100,0,0" VerticalAlignment="Top" Width="500" Source="image/logo.jpg" Visibility="Visible"/>
+        <Image HorizontalAlignment="Left" Height="146" Margin="250,250,0,0" VerticalAlignment="Top" Width="500" Source="image/logo.jpg" Visibility="Visible"/>
+        <TextBlock HorizontalAlignment="Left" Text="绍兴科技馆自助售票机" FontSize="30" Margin="300,36,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Button Content="DEBUG BUTTON" HorizontalAlignment="Left" Margin="28,60,0,0" VerticalAlignment="Top" Width="150" Click="Button_Click"/>
+        </Grid>
+        </Viewbox>
+</Window>
