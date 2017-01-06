@@ -22,6 +22,16 @@ namespace TVM
     /// </summary>
     public partial class MainWindow : Window
     {
+        # region 属性
+        CoinAccepter coinAccepter;  //投币器类
+
+        //退币标志位
+        bool COINHOPPER = false;
+
+        //打印机属性
+        string path = "/dev/usb/lp0";  
+        string dt;  //datetime string  //打印机属性
+        # endregion
 
         public MainWindow()
         {
@@ -30,7 +40,9 @@ namespace TVM
             //1.初始化打印机  通讯是否正常？ 是否有纸？
             //TRY CATCH
             // PRINTER_OK = true
-            //2.初始化投币器   采用串口通讯   
+            //2.初始化投币器   采用串口通讯   开启后，串口一直处于打开状态，通过控制投币器使能来进行控制
+            try { coinAccepter = new CoinAccepter(); }
+            catch { MessageBox.Show("投币器初始化失败"); }
             //TRY CATCH
             // COIN_RECEIVER_OK = true
             //3.初始化退币器
@@ -88,11 +100,7 @@ namespace TVM
                     //1 提示信息
                     mbr = MessageBox.Show("注意，本项目具有一定危险性","WARNING",MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     //确认注意选项后，才进入下一步，否则返回主菜单。
-                    if (mbr == MessageBoxResult.OK) 
-                    {
-                        PrintTicket("360自行车");
-                        MessageBox.Show("360 is PRINTING");
-                    }
+                    
                     //2 获取数据库票务数据并显示
                     // return item_list <--GetTicketInfoFromDatabase(string time,string item)
                     // Display(item_list)
@@ -100,6 +108,24 @@ namespace TVM
                     // if button_OK  clicked
                                    
                     //4 等待硬币投入
+                    while (!COINHOPPER) //退币选项未被按下
+                    {
+                        if (mbr == MessageBoxResult.OK)
+                        {
+                            if (coinAccepter.WaitForCoins(5))  //硬币数量
+                            {
+                                PrintTicket("360自行车");
+                                MessageBox.Show("360 is PRINTING");
+                            }
+                            else { }
+                        }
+                    }
+                    if (COINHOPPER == true)
+                    {
+                        COINHOPPER = false;
+                        //获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
+                        //退币
+                    }
                     //4.1if 投币完成
                     //      出票
                     //  if 出票完成  返回主界面
@@ -181,13 +207,18 @@ namespace TVM
         public static extern int PrintDiskbmpfile(string strPath);
         # endregion
 
-        string path = "/dev/usb/lp0";
-        string dt;  //datetime string
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
+            //退币
+            COINHOPPER = true;
+        }
+        private void Button_start_comm(object sender, RoutedEventArgs e)
+        {
+             //test      
         }
 
+        # region 门票打印模块
         /// <summary>  门票打印
         /// 门票打印
         /// </summary>
@@ -208,8 +239,6 @@ namespace TVM
             PrintFeedline(10);
             PrintCutpaper(1);
         }
-
-
-
+        # endregion
     }
 }
