@@ -188,6 +188,10 @@ namespace TVM
 
         }
 
+        /// <summary>  门票打印
+        /// 门票打印
+        /// </summary>
+        /// <param name="ticketName">门票项目名称</param>
         private void PrintTicket(string ticketName)
         {
             (SetPrintport("USB001", 38400)).ToString();

@@ -51,7 +51,7 @@ namespace TVM.CoinAccepter
             if (_keepReading)
             {
                 _keepReading = false;
-                thread.Join();
+                thread.Join(); //
                 thread = null;
             }
         }
@@ -68,7 +68,7 @@ namespace TVM.CoinAccepter
                         byte[] readBuffer = new byte[count];
                         try
                         {
-                            Application.DoEvents();
+                            //Application.DoEvents();
                             serialPort.Read(readBuffer, 0, count);
                             if (DataReceived != null)
                                 DataReceived(readBuffer);
@@ -82,17 +82,19 @@ namespace TVM.CoinAccepter
             }
         }
 
-        public void Open()
+        public bool Open()
         {
             Close();
             serialPort.Open();
             if (serialPort.IsOpen)
             {
                 StartReading();
+                return true;
             }
             else
             {
                 MessageBox.Show("串口打开失败！");
+                return false;
             }
         }
 
@@ -102,12 +104,23 @@ namespace TVM.CoinAccepter
             serialPort.Close();
         }
 
-        public void WritePort(byte[] send, int offSet, int count)
+        public bool WritePort(byte[] send, int offSet, int count)
         {
             if (IsOpen)
             {
-                serialPort.Write(send, offSet, count);
+                try
+                {
+                    serialPort.Write(send, offSet, count);
+                    return true;
+                }
+                catch
+                {
+                    MessageBox.Show("串口数据发送失败");
+                    return false;
+                }
             }
+            else
+                return false;
         }
     }
 }
