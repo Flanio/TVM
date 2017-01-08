@@ -18,15 +18,15 @@ namespace TVM
         public event EventHandle DataReceived;
 
         public SerialPort serialPort;
-        Thread thread;
+        Thread threadReading;
         volatile bool _keepReading;
 
         public Comm()  //构造函数
         {
             serialPort = new SerialPort();
-            thread = null;
+            threadReading = null;
             _keepReading = false;
-            DataReceived += new Comm.EventHandle(comm_DataReceived);
+            DataReceived += new Comm.EventHandle(commDataReceived);
         }
 
         public bool IsOpen
@@ -42,8 +42,9 @@ namespace TVM
             if (!_keepReading)
             {
                 _keepReading = true;
-                thread = new Thread(new ThreadStart(ReadPort));
-                thread.Start();
+                threadReading = new Thread(new ThreadStart(ReadPort));
+                threadReading.Start();
+                MessageBox.Show("START READING");
             }
         }
 
@@ -52,8 +53,8 @@ namespace TVM
             if (_keepReading)
             {
                 _keepReading = false;
-                thread.Join(); //thread执行完后再执行主线程
-                thread = null;
+                threadReading.Join(); //thread执行完后再执行主线程
+                threadReading = null;
             }
         }
 
@@ -88,7 +89,7 @@ namespace TVM
         public bool Open()
         {
             Close();
-            MessageBox.Show("ready");
+            //MessageBox.Show("ready");
             serialPort.Open();
             if (serialPort.IsOpen)
             {
@@ -135,7 +136,7 @@ namespace TVM
                 return false;
         }
 
-        private void comm_DataReceived(byte[] readBuffer)
+        private void commDataReceived(byte[] readBuffer)
         {
             //log.Info(HexCon.ByteToString(readBuffer));
             //DataReceived -= new Comm.EventHandle(DataReceived);

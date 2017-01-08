@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace TVM
 {
@@ -23,7 +24,11 @@ namespace TVM
     public partial class MainWindow : Window
     {
         # region 属性
+
+        MessageBoxResult mbr;
+
         CoinAccepter coinAccepter;  //投币器类
+        int CoinNum;
 
         //退币标志位
         bool COINHOPPER = false;
@@ -31,6 +36,8 @@ namespace TVM
         //打印机属性
         string path = "/dev/usb/lp0";  
         string dt;  //datetime string  //打印机属性
+
+        Thread threadCoinHopper = null;//退币器进程
         # endregion
 
         public MainWindow()
@@ -63,7 +70,7 @@ namespace TVM
         private void Button_360(object sender, RoutedEventArgs e)
         {
             ///显示购票界面
-            Get_ticket_info("360");
+            GetTicketInfo("360");
             //PrintTicket("360自行车");
             ///选择票型
             ///
@@ -72,7 +79,7 @@ namespace TVM
         private void Button_FullSound(object sender, RoutedEventArgs e)
         {
             ///显示购票界面
-            Get_ticket_info("VR");
+            GetTicketInfo("VR");
             //PrintTicket("VR体验");
             ///选择票型
         }
@@ -80,7 +87,7 @@ namespace TVM
         private void Button_VR(object sender, RoutedEventArgs e)
         {
             ///显示购票界面
-            Get_ticket_info("FullSound");
+            GetTicketInfo("FullSound");
             //PrintTicket("全息音效");
             ///选择票型
         }
@@ -91,49 +98,28 @@ namespace TVM
         /// 票面信息显示
         /// </summary>
         /// <param name="item"></param>
-        private void Get_ticket_info(string item)
+        private void GetTicketInfo(string item)
         {
-            MessageBoxResult mbr;
             switch (item)
             { 
                 case "360":
                     //1 提示信息
                     mbr = MessageBox.Show("注意，本项目具有一定危险性","WARNING",MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     //确认注意选项后，才进入下一步，否则返回主菜单。
-                    
-                    //2 获取数据库票务数据并显示
-                    // return item_list <--GetTicketInfoFromDatabase(string time,string item)
-                    // Display(item_list)
-                    //3 等待用户选择  数量
-                    // if button_OK  clicked
-                                   
-                    //4 等待硬币投入
-                    while (!COINHOPPER) //退币选项未被按下
+                    if (mbr == MessageBoxResult.OK)  //mbr 是否需要清零？？
                     {
-                        if (mbr == MessageBoxResult.OK)
-                        {
-                            if (coinAccepter.WaitForCoins(5))  //硬币数量
-                            {
-                                PrintTicket("360自行车");
-                                MessageBox.Show("360 is PRINTING");
-                            }
-                            else { }
-                        }
+                        //2 获取数据库票务数据并显示
+                        // return item_list <--GetTicketInfoFromDatabase(string time,string item)
+                        // Display(item_list)
+                        //3 等待用户选择  数量  获取硬币数量 int coinNum
+                        // if button_OK  clicked 确认支付后，开始进入投币接收状态
+                        AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
                     }
-                    if (COINHOPPER == true)
-                    {
-                        COINHOPPER = false;
-                        //获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
-                        //退币
+                    else
+                    { 
+                        //退出返回主窗口
                     }
-                    //4.1if 投币完成
-                    //      出票
-                    //  if 出票完成  返回主界面
-                    //4.2else  退钱按钮被按下
-                    //  退款
-                    //  4.2.1if 退款成功 返回主界面
-                    //  4.2.2else MessageBox 请联系工作人员
-                    
+                   
                     break;
                 case "VR":
                     mbr = MessageBox.Show("注意，本项目具有一定危险性", "WARNING", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
@@ -142,7 +128,6 @@ namespace TVM
                         PrintTicket("VR体验");
                         MessageBox.Show("VR is PRINTING");
                     }
-                   
                     break;
                 case "FullSound":
                     mbr = MessageBox.Show("注意，本项目具有一定危险性", "WARNING", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
@@ -151,12 +136,51 @@ namespace TVM
                         PrintTicket("全息音效");
                         MessageBox.Show("FullSound is PRINTING");
                     }
-                    
                     break;
                 default:
                     break;
             }
         }
+        /// <summary>接收硬币线程
+        /// 接收硬币函数
+        /// </summary>
+        /// <param name="CoinNum"></param>
+        public void AcceptCoin(int CoinNum)
+        {
+            threadCoinHopper = new Thread(new ParameterizedThreadStart(WaitForCoins));
+            threadCoinHopper.Start(CoinNum);
+            //WaitForCoins();//debug
+            MessageBox.Show("收取硬币线程开启");
+        }
+
+        public void WaitForCoins(object CoinNum)
+        {
+            //4.1if 投币完成
+            //      出票
+            //  if 出票完成  返回主界面
+            //4.2else  退钱按钮被按下
+            //  退款
+            //  4.2.1if 退款成功 返回主界面
+            //  4.2.2else MessageBox 请联系工作人员
+            while (!COINHOPPER) //退币选项未被按下
+            {
+                {
+                    if (coinAccepter.WaitForCoins( int.Parse( CoinNum.ToString() ) ) )  //硬币数量
+                    {
+                        coinAccepter.ClearCurrentCoinsNum();
+                        //PrintTicket("360自行车");
+                        MessageBox.Show("360 is PRINTING");
+                    }
+                }
+            }
+            if(COINHOPPER == true)
+            {                
+                COINHOPPER = false;
+            //获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
+            //退币
+            }
+        }
+
         # endregion
 
         # region 数据库信息操作
@@ -187,18 +211,35 @@ namespace TVM
         }
         # endregion
 
+        private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
+        {
+            //退币
+            COINHOPPER = true;//退币状态置位1
+            //调用退币模块
+            CoinNum = coinAccepter.GetCurrentCoinsNum(); //获取当前收币模块中的硬币数量
+            MessageBox.Show(CoinNum.ToString());
+            //CoinHopper(int CoinNum); //退币 数量为CoinNum
+
+        }
+
+        private void Button_start_comm(object sender, RoutedEventArgs e)
+        {
+             //test      
+        }
+
+        # region 门票打印模块
 
         # region DLL import
         [DllImport("MsprintsdkRM.dll")]
-        public static extern int SetDevname(int iDevtype,string cDevname,int iBaudrate);
-        [DllImport("MsprintsdkRM.dll",CallingConvention=CallingConvention.Cdecl)]
+        public static extern int SetDevname(int iDevtype, string cDevname, int iBaudrate);
+        [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SetPrintport(string strPort, int iBaudrate);
         [DllImport("MsprintsdkRM.dll")]
         public static extern int SetInit();
         [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int PrintFeedline(int iLine);
         [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int PrintString(string strData,int iImme);
+        public static extern int PrintString(string strData, int iImme);
         [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SetClean();
         [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -206,19 +247,6 @@ namespace TVM
         [DllImport("MsprintsdkRM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int PrintDiskbmpfile(string strPath);
         # endregion
-
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //退币
-            COINHOPPER = true;
-        }
-        private void Button_start_comm(object sender, RoutedEventArgs e)
-        {
-             //test      
-        }
-
-        # region 门票打印模块
         /// <summary>  门票打印
         /// 门票打印
         /// </summary>
