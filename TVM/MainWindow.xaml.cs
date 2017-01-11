@@ -150,7 +150,7 @@ namespace TVM
             threadCoinHopper = new Thread(new ParameterizedThreadStart(WaitForCoins));
             threadCoinHopper.Start(CoinNum);
             //WaitForCoins();//debug
-            MessageBox.Show("收取硬币线程开启");
+            //MessageBox.Show("收取硬币线程开启");
         }
 
         public void WaitForCoins(object CoinNum)
@@ -176,6 +176,7 @@ namespace TVM
             if(COINHOPPER == true)
             {                
                 COINHOPPER = false;
+                MessageBox.Show("进入退币模块");
             //获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
             //退币
             }
@@ -224,7 +225,7 @@ namespace TVM
 
         private void Button_start_comm(object sender, RoutedEventArgs e)
         {
-             //test      
+            coinAccepter.setReading();//test      
         }
 
         # region 门票打印模块

@@ -21,6 +21,10 @@ namespace TVM
         byte[] strIdling  =    { 0x90, 0x05, 0x11, 0x03, 0xA9 };
 
         private static int _currentCoinsNum = 5;
+
+        public bool _KeepCheck = false;
+        public bool _PrintTicket = false;
+        public int _TicketNum;
         # endregion
 
         #region 构造函数
@@ -90,7 +94,7 @@ namespace TVM
                     return false;
             }
         }
-        private void setReading()  //设置接受币状态
+        public void setReading()  //设置接受币状态
         {
             CommCmdSender("ENABLE");
         }
@@ -111,28 +115,32 @@ namespace TVM
         public bool WaitForCoins(int num)
         {
             CommCmdSender("ENABLE");
-            if (num == CheckIn(num))
+            while(_KeepCheck)
             {
-                CommCmdSender("DISABLE");
-                return true;
+                if (_KeepCheck)
+                {
+                    CommCmdSender("DISABLE");
+                    return true;
+                }
+                else
+                    return false;
             }
-            else
-                return false;
+            return false;
         }
         /// <summary> 查询投币数量 
         /// 查询投币数量  开辟一个新的线程进行操作  using？？
         /// </summary>
         /// <param name="coinNumber">准备接收的硬币数量,从UI获取</param>
         /// <returns>0:投币完成 1:投币未完成 2:退币按钮被按下</returns>
-        public int CheckIn(int coinNumber)
+        public void CheckIn(int coinNumber)
         {
-            //while (true) ; 
+                
             if (_currentCoinsNum == coinNumber)
-            { return 5; }  //debug return 5
-            else if (true)
-            { return 1; }
-            else
-            { return 2; }
+                {
+                    _currentCoinsNum = 0;
+                }
+                else {
+                }
         }
         /// <summary>获取当前硬币数量
         /// 获取当前硬币数量

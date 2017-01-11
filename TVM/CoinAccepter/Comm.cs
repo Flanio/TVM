@@ -68,7 +68,7 @@ namespace TVM
                     int count = serialPort.BytesToRead;
                     if (count > 0)
                     {
-                        MessageBox.Show("num:  " + count.ToString());
+                        //MessageBox.Show("num:  " + count.ToString());
                         byte[] readBuffer = new byte[count];
                         try
                         {
@@ -140,11 +140,14 @@ namespace TVM
         {
             //log.Info(HexCon.ByteToString(readBuffer));
             //DataReceived -= new Comm.EventHandle(DataReceived);
-            MessageBox.Show(readBuffer.Length.ToString());
+            //MessageBox.Show(readBuffer.Length.ToString());
             if (readBuffer.Length>0)
             {
-                string receive = ByteToStr(readBuffer);
-                MessageBox.Show(receive);
+                //string receive = ByteToStr(readBuffer);
+                //MessageBox.Show(Encoding.UTF8.GetString(readBuffer));
+                Console.WriteLine("yahoo "+byteToHexStr( readBuffer) );
+
+                //Console.WriteLine("yahoo " + StringToHexString(receive,Encoding.UTF8));// ByteToStr(readBuffer));
                 # region debug
                 //string str = "06";
                 //if (string.Equals(receive.Trim(), str, StringComparison.CurrentCultureIgnoreCase))
@@ -189,13 +192,23 @@ namespace TVM
             }
         }
 
-        //数组转换字符串
-        static String ByteToStr(Byte[] bt)
-        {
-            //return encoding.GetString(bt);
-            string str;
-            return str = System.Text.Encoding.UTF8.GetString(bt);
-        }
+        /// <summary>
+        /// 字节数组转16进制字符串
+        /// </summary>
+        /// <param name=”bytes”></param>
+        /// <returns></returns>
+        public static string byteToHexStr(byte[] bytes)
+       {
+            string returnStr = "";
+            if (bytes != null)
+            {
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                     returnStr += bytes[i].ToString("X2");
+                 }
+             }
+            return returnStr;
+         }
 
     }
 }
