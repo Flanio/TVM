@@ -20,7 +20,7 @@ namespace TVM
         byte[] strDown    =    { 0x90, 0x05, 0x14, 0x03, 0xAC };
         byte[] strIdling  =    { 0x90, 0x05, 0x11, 0x03, 0xA9 };
 
-        private static int _currentCoinsNum = 5;
+        private static int _currentCoinsNum = 0;
 
         public bool _KeepCheck = false;
         public bool _PrintTicket = false;
@@ -41,7 +41,7 @@ namespace TVM
         {
             CoinComm = new Comm();
             //波特率
-            CoinComm.serialPort.PortName = "COM5";
+            CoinComm.serialPort.PortName = "COM2";
             CoinComm.serialPort.BaudRate = 9600;
             //数据位
             CoinComm.serialPort.DataBits = 8;
@@ -98,7 +98,7 @@ namespace TVM
         {
             CommCmdSender("ENABLE");
         }
-        private void setReject()  //设置禁用投币状态
+        public void setReject()  //设置禁用投币状态
         {
             CommCmdSender("DISABLE");
         }
@@ -112,21 +112,25 @@ namespace TVM
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
-        public bool WaitForCoins(int num)
+        public bool CheckAllIn(int NumNeeded)
         {
-            CommCmdSender("ENABLE");
-            while(_KeepCheck)
+            //CommCmdSender("ENABLE");
+            _KeepCheck = true;
+            //MessageBox.Show("keepcheck");
+            if(_KeepCheck)
             {
-                if (_KeepCheck)
+                if (GetCurrentCoinsNum() == NumNeeded)
                 {
-                    CommCmdSender("DISABLE");
+                    MessageBox.Show("im in!!");
+                    CommCmdSender("DISABLE"); //禁用收币器
+                    ClearCurrentCoinsNum();//设置硬币数量
+                    _KeepCheck = false;
                     return true;
                 }
-                else
-                    return false;
             }
             return false;
         }
+
         /// <summary> 查询投币数量 
         /// 查询投币数量  开辟一个新的线程进行操作  using？？
         /// </summary>
@@ -142,19 +146,21 @@ namespace TVM
                 else {
                 }
         }
+
         /// <summary>获取当前硬币数量
         /// 获取当前硬币数量
         /// </summary>
         /// <returns></returns>
         public int GetCurrentCoinsNum() 
         {
-            return _currentCoinsNum;
+            return _currentCoinsNum = CoinComm._coin;
         }
         /// <summary>硬币数量清零
         /// 硬币数量清零
         /// </summary>
         public void ClearCurrentCoinsNum()
         {
+            CoinComm._coin = 0;
             _currentCoinsNum = 0;
         }
         #endregion

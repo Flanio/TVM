@@ -28,7 +28,7 @@ namespace TVM
         MessageBoxResult mbr;
 
         CoinAccepter coinAccepter;  //投币器类
-        int CoinNum;
+        int CoinNum = 5 ;
 
         //退币标志位
         bool COINHOPPER = false;
@@ -37,6 +37,7 @@ namespace TVM
         string path = "/dev/usb/lp0";  
         string dt;  //datetime string  //打印机属性
 
+        Thread threadCoinAccepter = null;//投币器进程
         Thread threadCoinHopper = null;//退币器进程
         # endregion
 
@@ -147,8 +148,11 @@ namespace TVM
         /// <param name="CoinNum"></param>
         public void AcceptCoin(int CoinNum)
         {
-            threadCoinHopper = new Thread(new ParameterizedThreadStart(WaitForCoins));
-            threadCoinHopper.Start(CoinNum);
+            if (threadCoinAccepter == null)
+            {
+                threadCoinAccepter = new Thread(new ParameterizedThreadStart(WaitForCoins));
+            }
+            threadCoinAccepter.Start(CoinNum);
             //WaitForCoins();//debug
             //MessageBox.Show("收取硬币线程开启");
         }
@@ -162,24 +166,29 @@ namespace TVM
             //  退款
             //  4.2.1if 退款成功 返回主界面
             //  4.2.2else MessageBox 请联系工作人员
+            if (coinAccepter.GetCurrentCoinsNum() != 0)
+            { MessageBox.Show("error!" + coinAccepter.GetCurrentCoinsNum()); }
             while (!COINHOPPER) //退币选项未被按下
             {
+                if (coinAccepter.CheckAllIn( int.Parse( CoinNum.ToString() ) ) )  //硬币数量达到要求数量 （5个）
                 {
-                    if (coinAccepter.WaitForCoins( int.Parse( CoinNum.ToString() ) ) )  //硬币数量
-                    {
-                        coinAccepter.ClearCurrentCoinsNum();
-                        //PrintTicket("360自行车");
-                        MessageBox.Show("360 is PRINTING");
-                    }
+                    //coinAccepter.ClearCurrentCoinsNum();
+                    //PrintTicket("360自行车");
+                    MessageBox.Show("360 is PRINTING");
+                    //coinAccepter.setReject();//禁用投币器
+                    break;
                 }
+               // MessageBox.Show("im out");
             }
-            if(COINHOPPER == true)
-            {                
-                COINHOPPER = false;
-                MessageBox.Show("进入退币模块");
-            //获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
-            //退币
-            }
+            //if(COINHOPPER == true)
+            //{                
+            //    COINHOPPER = false;
+            //    MessageBox.Show("进入退币模块");
+            ////获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
+            ////退币
+            //}
+            threadCoinAccepter.Abort();
+
         }
 
         # endregion
@@ -214,13 +223,14 @@ namespace TVM
 
         private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
         {
+            coinAccepter.setReject();//禁止收币功能
             //退币
             COINHOPPER = true;//退币状态置位1
             //调用退币模块
             CoinNum = coinAccepter.GetCurrentCoinsNum(); //获取当前收币模块中的硬币数量
-            MessageBox.Show(CoinNum.ToString());
+            MessageBox.Show("退币数量为 " + CoinNum.ToString() + "\n点击确认后开始退币");
+            COINHOPPER = false;
             //CoinHopper(int CoinNum); //退币 数量为CoinNum
-
         }
 
         private void Button_start_comm(object sender, RoutedEventArgs e)

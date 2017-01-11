@@ -21,12 +21,24 @@ namespace TVM
         Thread threadReading;
         volatile bool _keepReading;
 
+        public int _coin { get; set; }
+
+        byte[] strEnable = { 0x90, 0x05, 0x01, 0x03, 0x99 };  //使能命令
+        byte[] strDisable = { 0x90, 0x05, 0x02, 0x03, 0x9A }; //禁用功能命令
+        byte[] strCheck = { 0x90, 0x05, 0x11, 0x03, 0xA9 };  //状态查询命令
+        byte[] strAck = { 0x90, 0x05, 0x50, 0x03, 0xE8 };    //应答返回
+        byte[] strNak = { 0x90, 0x05, 0x4B, 0x03, 0xE3 };    //没有应答
+        byte[] strCoin = { 0x90, 0x06, 0x12, 0x03, 0x03, 0xAE };   //获得硬币
+        byte[] strDown = { 0x90, 0x05, 0x14, 0x03, 0xAC };       //功能被关闭
+        byte[] strIdling = { 0x90, 0x05, 0x11, 0x03, 0xA9 };     //功能正常
+
         public Comm()  //构造函数
         {
             serialPort = new SerialPort();
             threadReading = null;
             _keepReading = false;
             DataReceived += new Comm.EventHandle(commDataReceived);
+            _coin = 0;
         }
 
         public bool IsOpen
@@ -136,17 +148,35 @@ namespace TVM
                 return false;
         }
 
+        //串口数据获取事件
         private void commDataReceived(byte[] readBuffer)
         {
-            //log.Info(HexCon.ByteToString(readBuffer));
-            //DataReceived -= new Comm.EventHandle(DataReceived);
             //MessageBox.Show(readBuffer.Length.ToString());
             if (readBuffer.Length>0)
             {
                 //string receive = ByteToStr(readBuffer);
                 //MessageBox.Show(Encoding.UTF8.GetString(readBuffer));
-                Console.WriteLine("yahoo "+byteToHexStr( readBuffer) );
-
+                string receivedData = byteToHexStr(readBuffer);
+                Console.WriteLine("yahoo "+receivedData );
+                Console.WriteLine(byteToHexStr(strCoin));
+                if (string.Equals(byteToHexStr(strCoin), receivedData))
+                {
+                    _coin++;//收入一枚硬币
+                    Console.WriteLine("收入一枚硬币"); 
+                }
+                else if (string.Equals(byteToHexStr(strAck), receivedData))
+                { Console.WriteLine("投币器有应答"); }
+                else if (string.Equals(byteToHexStr(strNak), receivedData))
+                { Console.WriteLine("投币器没有应答"); }
+                else if (string.Equals(byteToHexStr(strDown), receivedData))
+                { Console.WriteLine("投币器被关闭"); }
+                else if (string.Equals(byteToHexStr(strIdling), receivedData))
+                { Console.WriteLine("投币器等待接受硬币"); }
+                else 
+                {
+                    //此处需要建立日志文件，以便日后查看错误
+                    Console.WriteLine(System.DateTime.Now.ToString() + "something wrong:" + receivedData);
+                }
                 //Console.WriteLine("yahoo " + StringToHexString(receive,Encoding.UTF8));// ByteToStr(readBuffer));
                 # region debug
                 //string str = "06";
@@ -192,7 +222,14 @@ namespace TVM
             }
         }
 
-        /// <summary>
+        //数组转换字符串
+        public static String ByteToStr(Byte[] bt)
+        {
+            //return encoding.GetString(bt);
+            string str;
+            return str = System.Text.Encoding.UTF8.GetString(bt);
+        }
+        /// <summary>字节数组转16进制字符串
         /// 字节数组转16进制字符串
         /// </summary>
         /// <param name=”bytes”></param>
