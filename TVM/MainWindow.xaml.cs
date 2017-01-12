@@ -15,30 +15,42 @@ using System.Windows.Shapes;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+using System.ComponentModel;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+
 namespace TVM
 {
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
         # region 属性
 
-        MessageBoxResult mbr;
+        bool mbr;
 
         CoinAccepter coinAccepter;  //投币器类
-        int CoinNum = 5 ;
+        int CoinNum = 5;
+        int TicketNum = 0;
 
         //退币标志位
         bool COINHOPPER = false;
 
         //打印机属性
-        string path = "/dev/usb/lp0";  
+        string path = "/dev/usb/lp0";
         string dt;  //datetime string  //打印机属性
 
         Thread threadCoinAccepter = null;//投币器进程
         Thread threadCoinHopper = null;//退币器进程
+
+        /// <summary>
+        /// Current status text to display
+        /// 当前状态显示字符串
+        /// </summary>
+        private string statusText = "1";
+
         # endregion
 
         public MainWindow()
@@ -59,7 +71,7 @@ namespace TVM
             //判断是否初始化完成？
             // if ( PRINTER_OK AND COIN_RECEIVER_OK AND COIN_RETURNER_OK )-->系统提示 完成
             // else () 提示错误
-             
+
         }
 
         # region  购票按钮触发
@@ -102,37 +114,18 @@ namespace TVM
         private void GetTicketInfo(string item)
         {
             switch (item)
-            { 
+            {
                 case "360":
-                    //1 提示信息
-                    mbr = MessageBox.Show("注意，本项目具有一定危险性","WARNING",MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    //确认注意选项后，才进入下一步，否则返回主菜单。
-                    if (mbr == MessageBoxResult.OK)  //mbr 是否需要清零？？
-                    {
-                        //2 获取数据库票务数据并显示
-                        // return item_list <--GetTicketInfoFromDatabase(string time,string item)
-                        // Display(item_list)
-                        //3 等待用户选择  数量  获取硬币数量 int coinNum
-                        // if button_OK  clicked 确认支付后，开始进入投币接收状态
-                        AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
-                    }
-                    else
-                    { 
-                        //退出返回主窗口
-                    }
-                   
+                    Launch360();
                     break;
                 case "VR":
-                    mbr = MessageBox.Show("注意，本项目具有一定危险性", "WARNING", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (mbr == MessageBoxResult.OK)
-                    {
-                        PrintTicket("VR体验");
-                        MessageBox.Show("VR is PRINTING");
-                    }
+                    LaunchVR();
                     break;
                 case "FullSound":
-                    mbr = MessageBox.Show("注意，本项目具有一定危险性", "WARNING", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (mbr == MessageBoxResult.OK)
+                    IMAGE_360.Visibility = Visibility.Visible;
+                    IMAGE_VR.Visibility = Visibility.Hidden;
+                    MBWarning();
+                    if (mbr)
                     {
                         PrintTicket("全息音效");
                         MessageBox.Show("FullSound is PRINTING");
@@ -151,10 +144,8 @@ namespace TVM
             if (threadCoinAccepter == null)
             {
                 threadCoinAccepter = new Thread(new ParameterizedThreadStart(WaitForCoins));
+                threadCoinAccepter.Start(CoinNum);
             }
-            threadCoinAccepter.Start(CoinNum);
-            //WaitForCoins();//debug
-            //MessageBox.Show("收取硬币线程开启");
         }
 
         public void WaitForCoins(object CoinNum)
@@ -167,28 +158,24 @@ namespace TVM
             //  4.2.1if 退款成功 返回主界面
             //  4.2.2else MessageBox 请联系工作人员
             if (coinAccepter.GetCurrentCoinsNum() != 0)
-            { MessageBox.Show("error!" + coinAccepter.GetCurrentCoinsNum()); }
+            { MessageBox.Show("error!" + coinAccepter.GetCurrentCoinsNum().ToString() + "当前硬币数量不为0"); }
             while (!COINHOPPER) //退币选项未被按下
             {
-                if (coinAccepter.CheckAllIn( int.Parse( CoinNum.ToString() ) ) )  //硬币数量达到要求数量 （5个）
+                INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString())); 
+                //INSTANTNUMBER.Text = "5";//coinAccepter.GetCurrentCoinsNum().ToString();
+                if (coinAccepter.CheckAllIn(int.Parse(CoinNum.ToString())))  //硬币数量达到要求数量 （5个）
                 {
                     //coinAccepter.ClearCurrentCoinsNum();
                     //PrintTicket("360自行车");
                     MessageBox.Show("360 is PRINTING");
+                    INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = "0"));
+                    TICKETNUMBER.Dispatcher.Invoke(new Action(() => TICKETNUMBER.Text = "0"));
                     //coinAccepter.setReject();//禁用投币器
                     break;
                 }
-               // MessageBox.Show("im out");
             }
-            //if(COINHOPPER == true)
-            //{                
-            //    COINHOPPER = false;
-            //    MessageBox.Show("进入退币模块");
-            ////获取当前已投入硬币数量 int num = CoinAccepter.getCurrentCoinsNums()
-            ////退币
-            //}
+            MessageBox.Show("threadabort");
             threadCoinAccepter.Abort();
-
         }
 
         # endregion
@@ -200,7 +187,7 @@ namespace TVM
         /// <param name="time"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        private List<string> Get_ticket_info_from_Database(string time,string item) //自定义一个List类型 包括 票的时间和数量
+        private List<string> Get_ticket_info_from_Database(string time, string item) //自定义一个List类型 包括 票的时间和数量
         {
             //根据当前时间和项目名称获取数据
             List<string> list = new List<string>();
@@ -210,10 +197,10 @@ namespace TVM
         }
 
         private int Change_ticket_info_from_Database(string item, string article, bool sellout, int num)
-        { 
+        {
             //根据项目名称，出票数量修改数据库票数信息
             bool SOLDOUT = sellout;
-            if (SOLDOUT== true)
+            if (SOLDOUT == true)
             {
 
             }
@@ -233,8 +220,9 @@ namespace TVM
             //CoinHopper(int CoinNum); //退币 数量为CoinNum
         }
 
-        private void Button_start_comm(object sender, RoutedEventArgs e)
+        private void Button_start_insert(object sender, RoutedEventArgs e)
         {
+            AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
             coinAccepter.setReading();//test      
         }
 
@@ -279,5 +267,141 @@ namespace TVM
             PrintCutpaper(1);
         }
         # endregion
+
+        #region 数值更新
+        /// <summary>
+        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+        /// <summary>
+        /// Gets or sets the current status text to display
+        /// 获取和设置当前状态并显示
+        /// </summary>
+        /// <summary>
+        /// Gets or sets the current status text to display
+        /// 获取和设置当前状态并显示
+        /// </summary>
+        public string StatusText
+        {
+            get
+            {
+                return this.statusText;
+            }
+
+            set
+            {
+                if (this.statusText != value)
+                //如果传入的数值不等于原来的值，则进入下一步，否则不更新
+                {
+                    this.statusText = value;
+                    //this.showText = "wowo";
+
+                    // notify any bound elements that the text has changed
+                    if (this.PropertyChanged != null)
+                    {
+                        this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
+                    }
+                }
+            }
+        }
+
+
+        private void plus(object sender, RoutedEventArgs e)
+        {
+            TicketNum++;
+            CoinNum = TicketNum * 5;
+            TICKETNUMBER.Text = TicketNum.ToString();
+        }
+
+        private void minus(object sender, RoutedEventArgs e)
+        {
+            if (TicketNum>0)
+            {
+                CoinNum = TicketNum * 5;
+                TicketNum--;
+            }
+            TICKETNUMBER.Text = TicketNum.ToString();
+        }
+        #endregion
+
+        /// <summary>
+        /// 启动弹出窗口，所有控件在xaml文件中设置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// 
+        private void Launch360()
+        {
+            //1 提示信息
+            MBWarning();
+        }
+
+        private void LaunchVR()
+        {
+            IMAGE_360.Visibility = Visibility.Hidden;
+            IMAGE_VR.Visibility = Visibility.Visible;
+            MBWarning();
+            if (mbr)
+            {
+                this.ToggleFlyout(1);
+                PrintTicket("VR体验");
+                MessageBox.Show("VR is PRINTING");
+            }
+        }
+
+        private void LaunchFullSound() { }
+
+        private void ToggleFlyout(int index)
+        {
+            var flyout = this.Flyouts.Items[index] as Flyout;
+            if (flyout == null)
+            {
+                return;
+            }
+
+            flyout.IsOpen = !flyout.IsOpen;
+        }
+
+        private void ShowSettingsRight(object sender, RoutedEventArgs e)
+        {
+            var flyout = (Flyout)this.Flyouts.Items[1];
+            flyout.Position = Position.Right;
+        }
+
+        private void ShowSettingsLeft(object sender, RoutedEventArgs e)
+        {
+            var flyout = (Flyout)this.Flyouts.Items[1];
+            flyout.Position = Position.Left;
+        }
+
+        private async void MBWarning()
+        {
+            // This demo runs on .Net 4.0, but we're using the Microsoft.Bcl.Async package so we have async/await support
+            // The package is only used by the demo and not a dependency of the library!
+            var mySettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "YES",
+                NegativeButtonText = "NOP",
+                FirstAuxiliaryButtonText = "CANCEL",
+                ColorScheme = MetroDialogOptions.ColorScheme
+            };
+
+            MessageDialogResult result = await this.ShowMessageAsync("警告", "注意，本项目具有一定危险性",
+                MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, mySettings);
+
+            if (result == MessageDialogResult.Affirmative)
+                //确认注意选项后，才进入下一步，否则返回主菜单。
+                    this.ToggleFlyout(0);
+                    //2 获取数据库票务数据并显示
+                    // return item_list <--GetTicketInfoFromDatabase(string time,string item)
+                    // Display(item_list)
+                    //3 等待用户选择  数量  获取硬币数量 int coinNum
+                    // if button_OK  clicked 确认支付后，开始进入投币接收状态
+            else
+                {
+                    //退出返回主窗口
+                }
+        }
     }
 }
+

@@ -41,7 +41,7 @@ namespace TVM
         {
             CoinComm = new Comm();
             //波特率
-            CoinComm.serialPort.PortName = "COM2";
+            CoinComm.serialPort.PortName = "COM5";
             CoinComm.serialPort.BaudRate = 9600;
             //数据位
             CoinComm.serialPort.DataBits = 8;
