@@ -5,33 +5,38 @@
         Title="SelfSelling" IgnoreTaskbarOnMaximize="True" WindowState="Maximized" Height="768" Width="1200" TitlebarHeight="0">
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
-            <Controls:Flyout Header="VR" Position="Left" Width="300" Theme="Accent">
+            <Controls:Flyout Name="FlyoutTool" Position="Left" Width="600" Theme="Accent" ClosingFinished="Flyout_close" >
                 <!-- Your custom content here -->
                 <Grid Margin="10"
                       Width="500">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="50"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Height="30" Width="200" Text="票数" FontSize="25" />
-                    <TextBlock Grid.Row="1" Grid.Column="0" Height="30" Width="200" Text="当前硬币数" FontSize="25" />
-                    <TextBlock Name="TICKETNUMBER" Grid.Row="0" Grid.Column="1" Height="30" Width="200" Text="0" FontSize="25" />
-                    <TextBlock Name="INSTANTNUMBER" Grid.Row="1" Grid.Column="1" Height="30" Width="200" Text="0" FontSize="25" />
-                    <Button Grid.Row="2" Height="30" Width="200" Content="确认开始投币" FontSize="12" Click="Button_start_insert"/>
-                    <Button Grid.Row="3" Height="30" Width="200" Content="我要退币" FontSize="12" Click="Button_CoinHopper"/>
-                    <Button Grid.Row="4" Height="30" Width="200" Content="加" FontSize="12" Click="plus"/>
-                    <Button Grid.Row="5" Height="30" Width="200" Content="减" FontSize="12" Click="minus"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="票数" FontSize="80"/>
+                    <TextBlock Name="TICKETNUMBER" Grid.Row="0" Grid.Column="2"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="1" FontSize="80"/>
+                    
+                    <Button Grid.Row="1" Grid.Column="1" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="加" FontSize="40" Click="plus"/>
+                    <Button Grid.Row="1" Grid.Column="2" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="减" FontSize="40" Click="minus"/>
+                    
+                    <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center"  HorizontalAlignment="Center"  Text="当前硬币数" FontSize="40" />
+                    <TextBlock Name="INSTANTNUMBER" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="0" FontSize="40" />
+                    
+                    <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="确认开始投币" FontSize="40" Click="Button_start_insert"/>
+                    <Button Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="我要退币" FontSize="40" Click="Button_CoinHopper"/>
                 </Grid>
             </Controls:Flyout>
             <Controls:Flyout Header="360自行车"
@@ -186,18 +191,13 @@
     <Controls:MetroContentControl>
         <Viewbox>
             <Grid>
-            <Button Content="360自行车" FontSize="30" HorizontalAlignment="Left" Margin="1,100,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_360"/>
-            <Button Content="VR体验" FontSize="30" HorizontalAlignment="Left" Margin="1,200,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_FullSound"/>
-            <Button Content="全息音效" FontSize="30" HorizontalAlignment="Left" Margin="1,300,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_VR"/>
+            <Button Content="360自行车" FontFamily="Microsoft YaHei UI" FontSize="30" HorizontalAlignment="Left" Margin="1,100,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_360" FontWeight="Bold"/>
+            <Button Content="VR体验" FontSize="30" HorizontalAlignment="Left" Margin="1,200,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_FullSound" FontFamily="Microsoft YaHei UI"/>
+            <Button Content="全息音效" FontSize="30" HorizontalAlignment="Left" Margin="1,300,0,0" VerticalAlignment="Top" Height="100" Width="200" Click="Button_VR" FontFamily="Microsoft YaHei UI"/>
             <Image Name="IMAGE_360" HorizontalAlignment="Left" Height="146" Margin="250,100,0,0" VerticalAlignment="Top" Width="500" Source="image/logo.jpg" Visibility="Hidden"/>
             <Image Name="IMAGE_VR" HorizontalAlignment="Left" Height="146" Margin="250,250,0,0" VerticalAlignment="Top" Width="500" Source="image/logo.jpg" Visibility="Hidden"/>
-            <TextBlock HorizontalAlignment="Left" Text="绍兴科技馆自助售票机" FontSize="30" Margin="300,36,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-            <Button Content="我要退币" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="101" Click="Button_CoinHopper"/>
-            <Button Content="确认开始投币" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="101" Click="Button_start_insert"/>
- 
-            <Button Content="加" HorizontalAlignment="Left" Margin="126,20,0,0" VerticalAlignment="Top" Width="75" Click="plus"/>
-            <Button Content="减" HorizontalAlignment="Left" Margin="126,60,0,0" VerticalAlignment="Top" Width="75" Click="minus"/>
-        </Grid>
+            <TextBlock HorizontalAlignment="Left" Text="绍兴科技馆自助售票机" FontSize="30" Margin="209,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            </Grid>
     </Viewbox>
     </Controls:MetroContentControl>
 </Controls:MetroWindow>
