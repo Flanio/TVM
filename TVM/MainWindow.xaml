@@ -35,8 +35,8 @@
                     <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center"  HorizontalAlignment="Center"  Text="当前硬币数" FontSize="40" />
                     <TextBlock Name="INSTANTNUMBER" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="0" FontSize="40" />
                     
-                    <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="确认开始投币" FontSize="40" Click="Button_start_insert"/>
-                    <Button Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="我要退币" FontSize="40" Click="Button_CoinHopper"/>
+                    <Button Grid.Row="3" Name="ButtonInsert" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="确认开始投币" FontSize="40" Click="Button_start_insert"/>
+                    <Button Grid.Row="3" Name="Buttonhopper" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="我要退币" FontSize="40" Visibility="Collapsed" Click="Button_CoinHopper"/>
                 </Grid>
             </Controls:Flyout>
             <Controls:Flyout Header="360自行车"

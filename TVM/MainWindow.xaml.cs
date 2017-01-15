@@ -29,8 +29,9 @@ namespace TVM
         # region 属性
 
         CoinAccepter coinAccepter;  //投币器类
-        int CoinNum = 0;
+        int CoinNum = 5;
         int TicketNum = 1;
+        int PreCoinNum = 0;
 
         //退币标志位
         bool COINHOPPER = false;
@@ -211,6 +212,8 @@ namespace TVM
             //退币
             //if(coinAccepter.GetCurrentCoinsNum != 0)
             //{ } 此处有bug 投币过程中不能退出
+            //threadCoinAccepter.Abort();
+            //Button_CoinHopper(this, System.Windows.RoutedEvent);
             TicketNum = 1;
             TICKETNUMBER.Text = "1";
         }
@@ -232,21 +235,28 @@ namespace TVM
         #region UI交互接口
         private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
         {
+            ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+            Buttonhopper.Visibility = System.Windows.Visibility.Collapsed;
             coinAccepter.setReject();//禁止收币功能
-            //退币
             COINHOPPER = true;//退币状态置位1
+            //投币线程强制终止
+            threadCoinAccepter.Abort();
+            //退币
             //调用退币模块
             CoinNum = coinAccepter.GetCurrentCoinsNum(); //获取当前收币模块中的硬币数量
             MessageBox.Show("退币数量为 " + CoinNum.ToString() + "\n点击确认后开始退币");
             COINHOPPER = false;
-            //CoinHopper(int CoinNum); //退币 数量为CoinNum
 
+            TicketNum = 1;
+            CoinNum = 5;
+            //CoinHopper(int CoinNum); //退币 数量为CoinNum
         }
 
         private void Button_start_insert(object sender, RoutedEventArgs e)
         {
+            Buttonhopper.Visibility = System.Windows.Visibility.Visible;
+            ButtonInsert.Visibility = System.Windows.Visibility.Collapsed;
             AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
-            coinAccepter.setReading();//test      
         }
 
         private void plus(object sender, RoutedEventArgs e)
@@ -260,8 +270,8 @@ namespace TVM
         {
             if (TicketNum > 1)
             {
-                CoinNum = TicketNum * 5;
                 TicketNum--;
+                CoinNum = TicketNum * 5;                
             }
             TICKETNUMBER.Text = TicketNum.ToString();
         }
@@ -274,9 +284,11 @@ namespace TVM
         /// <param name="CoinNum"></param>
         public void AcceptCoin(int CoinNum)
         {
-            if (threadCoinAccepter == null)
+            //if (threadCoinAccepter == null)
             {
+                //MessageBox.Show("new coin thread");
                 threadCoinAccepter = new Thread(new ParameterizedThreadStart(WaitForCoins));
+                MessageBox.Show(CoinNum.ToString());
                 threadCoinAccepter.Start(CoinNum);
             }
         }
@@ -290,26 +302,40 @@ namespace TVM
             //  退款
             //  4.2.1if 退款成功 返回主界面
             //  4.2.2else MessageBox 请联系工作人员
+            coinAccepter.setReading();//test    
             if (coinAccepter.GetCurrentCoinsNum() != 0)
             { MessageBox.Show("error!" + coinAccepter.GetCurrentCoinsNum().ToString() + "当前硬币数量不为0"); }
             while (!COINHOPPER) //退币选项未被按下
             {
-                INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString())); 
                 //INSTANTNUMBER.Text = "5";//coinAccepter.GetCurrentCoinsNum().ToString();
                 if (coinAccepter.CheckAllIn(int.Parse(CoinNum.ToString())))  //硬币数量达到要求数量 （5个）
                 {
+                    INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
                     //coinAccepter.ClearCurrentCoinsNum();
                     //PrintTicket("360自行车");
+                    ButtonInsert.Dispatcher.Invoke(new Action(() => ButtonInsert.Visibility = System.Windows.Visibility.Visible));
+                    ButtonInsert.Dispatcher.Invoke(new Action(() => Buttonhopper.Visibility = System.Windows.Visibility.Collapsed));
+
                     MessageBox.Show("360 is PRINTING");
+                    //重置无效？？
                     TicketNum = 1;
-                    CoinNum = 0;
+                    CoinNum = 5 ;
+                    MessageBox.Show("pre"+CoinNum.ToString()+ "  pre"+TicketNum.ToString());
                     INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = "0"));
                     TICKETNUMBER.Dispatcher.Invoke(new Action(() => TICKETNUMBER.Text = "1"));
                     //coinAccepter.setReject();//禁用投币器
                     break;
                 }
+                else
+                {
+                    if (PreCoinNum != coinAccepter.GetCurrentCoinsNum())
+                    {
+                        PreCoinNum = coinAccepter.GetCurrentCoinsNum();
+                        INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
+                    }
+                }
             }
-            MessageBox.Show("threadabort");
+            //MessageBox.Show("threadabort");
             threadCoinAccepter.Abort();
         }
 

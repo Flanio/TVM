@@ -41,7 +41,7 @@ namespace TVM
         {
             CoinComm = new Comm();
             //波特率
-            CoinComm.serialPort.PortName = "COM2";
+            CoinComm.serialPort.PortName = "COM5";
             CoinComm.serialPort.BaudRate = 9600;
             //数据位
             CoinComm.serialPort.DataBits = 8;
@@ -121,10 +121,10 @@ namespace TVM
             {
                 if (GetCurrentCoinsNum() == NumNeeded)
                 {
-                    MessageBox.Show("im in!!");
+                    //MessageBox.Show("im in!!");
                     CommCmdSender("DISABLE"); //禁用收币器
                     ClearCurrentCoinsNum();//设置硬币数量
-                    _KeepCheck = false;
+                    //_KeepCheck = false;
                     return true;
                 }
             }
