@@ -56,7 +56,8 @@ namespace TVM
                 _keepReading = true;
                 threadReading = new Thread(new ThreadStart(ReadPort));
                 threadReading.Start();
-                MessageBox.Show("START READING");
+                Console.WriteLine("start reading serial port");
+                //MessageBox.Show("START READING");
             }
         }
 
@@ -162,7 +163,7 @@ namespace TVM
                 if (string.Equals(byteToHexStr(strCoin), receivedData))
                 {
                     _coin++;//收入一枚硬币
-                    Console.WriteLine("收入一枚硬币"); 
+                    Console.WriteLine("收入一枚硬币: " + _coin.ToString()); 
                 }
                 else if (string.Equals(byteToHexStr(strAck), receivedData))
                 { Console.WriteLine("投币器有应答"); }

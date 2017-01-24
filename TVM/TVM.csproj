@@ -150,6 +150,17 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\360.jpg" />
+    <Resource Include="image\fullsound.jpg" />
+    <Resource Include="image\vr.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Fullsound1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\title.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

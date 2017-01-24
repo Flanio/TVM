@@ -61,7 +61,7 @@ namespace TVM
             // PRINTER_OK = true
             //2.初始化投币器   采用串口通讯   开启后，串口一直处于打开状态，通过控制投币器使能来进行控制
             try { coinAccepter = new CoinAccepter(); }
-            catch { MessageBox.Show("投币器初始化失败"); }
+            catch { MessageBox.Show("投币器初始化失败"); Application.Current.Shutdown(); }
             //TRY CATCH
             // COIN_RECEIVER_OK = true
             //3.初始化退币器
@@ -71,6 +71,14 @@ namespace TVM
             // if ( PRINTER_OK AND COIN_RECEIVER_OK AND COIN_RETURNER_OK )-->系统提示 完成
             // else () 提示错误
 
+        }
+
+        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            //MessageBox.Show("");
+            //e.Cancel = true;
+            Environment.Exit(-1);//暴力退出
+            //Application.Current.Shutdown();
         }
         #endregion
 
@@ -158,12 +166,13 @@ namespace TVM
             {
                 AffirmativeButtonText = "YES",
                 NegativeButtonText = "NOP",
-                FirstAuxiliaryButtonText = "CANCEL",
+                DialogMessageFontSize = 40.0,
+                //FirstAuxiliaryButtonText = "CANCEL",
                 ColorScheme = MetroDialogOptions.ColorScheme
             };
 
             MessageDialogResult result = await this.ShowMessageAsync("警告", "注意，本项目具有一定危险性",
-                MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, mySettings);
+                MessageDialogStyle.AffirmativeAndNegative, mySettings);
 
             if (result == MessageDialogResult.Affirmative)
             {
@@ -256,6 +265,8 @@ namespace TVM
         {
             Buttonhopper.Visibility = System.Windows.Visibility.Visible;
             ButtonInsert.Visibility = System.Windows.Visibility.Collapsed;
+            TicketNum = int.Parse( TICKETNUMBER.Text );
+            CoinNum = TicketNum * 5;
             AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
         }
 
@@ -305,23 +316,24 @@ namespace TVM
             coinAccepter.setReading();//test    
             if (coinAccepter.GetCurrentCoinsNum() != 0)
             { MessageBox.Show("error!" + coinAccepter.GetCurrentCoinsNum().ToString() + "当前硬币数量不为0"); }
-            while (!COINHOPPER) //退币选项未被按下
+            while (!COINHOPPER && true) //退币选项未被按下
             {
                 //INSTANTNUMBER.Text = "5";//coinAccepter.GetCurrentCoinsNum().ToString();
                 if (coinAccepter.CheckAllIn(int.Parse(CoinNum.ToString())))  //硬币数量达到要求数量 （5个）
                 {
-                    INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
+                    INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
                     //coinAccepter.ClearCurrentCoinsNum();
                     //PrintTicket("360自行车");
                     ButtonInsert.Dispatcher.Invoke(new Action(() => ButtonInsert.Visibility = System.Windows.Visibility.Visible));
                     ButtonInsert.Dispatcher.Invoke(new Action(() => Buttonhopper.Visibility = System.Windows.Visibility.Collapsed));
-
-                    MessageBox.Show("360 is PRINTING");
+                    coinAccepter.ClearCurrentCoinsNum();
+                    ShowPrintInfo();
+                    //this.Dispatcher.BeginInvoke(new Action(() => this.ShowMessageAsync("hello world","hello")));
                     //重置无效？？
-                    TicketNum = 1;
-                    CoinNum = 5 ;
                     MessageBox.Show("pre"+CoinNum.ToString()+ "  pre"+TicketNum.ToString());
-                    INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = "0"));
+                    TicketNum = 1;
+                    CoinNum = 5;
+                    INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = "0"));
                     TICKETNUMBER.Dispatcher.Invoke(new Action(() => TICKETNUMBER.Text = "1"));
                     //coinAccepter.setReject();//禁用投币器
                     break;
@@ -331,12 +343,32 @@ namespace TVM
                     if (PreCoinNum != coinAccepter.GetCurrentCoinsNum())
                     {
                         PreCoinNum = coinAccepter.GetCurrentCoinsNum();
-                        INSTANTNUMBER.Dispatcher.Invoke(new Action(() => INSTANTNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
+                        INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
                     }
                 }
             }
             //MessageBox.Show("threadabort");
+            //停止投币器线程
+            Console.WriteLine( "current thread " + threadCoinAccepter.Name);
             threadCoinAccepter.Abort();
+            Console.WriteLine( "current thread " + threadCoinAccepter.ToString());
+        }
+
+        private void ShowPrintInfo()
+        {
+            //var mySettings = new MetroDialogSettings()
+            //{
+            //    AffirmativeButtonText = "YES",
+            //    NegativeButtonText = "NOP",
+            //    DialogMessageFontSize = 40.0,
+            //    //FirstAuxiliaryButtonText = "CANCEL",
+            //    ColorScheme = MetroDialogOptions.ColorScheme
+            //};
+            TicketPrintStatus.Dispatcher.Invoke(new Action(() => TicketPrintStatus.Visibility=System.Windows.Visibility.Visible));
+            Thread.Sleep(2000);
+            TicketPrintStatus.Dispatcher.Invoke(new Action(() => TicketPrintStatus.Visibility = System.Windows.Visibility.Collapsed));
+            //this.Close();
+            //await this.ShowMessageAsync("警告", "注意，本项目具有一定危险性");
         }
 
         # endregion

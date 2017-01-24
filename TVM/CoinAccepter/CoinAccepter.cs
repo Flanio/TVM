@@ -41,7 +41,7 @@ namespace TVM
         {
             CoinComm = new Comm();
             //波特率
-            CoinComm.serialPort.PortName = "COM5";
+            CoinComm.serialPort.PortName = "COM2";
             CoinComm.serialPort.BaudRate = 9600;
             //数据位
             CoinComm.serialPort.DataBits = 8;
@@ -54,7 +54,8 @@ namespace TVM
             if (CoinComm.Open()) {
                 //禁用硬币器
                 if (CommCmdSender("DISABLE")) {
-                    MessageBox.Show("初始化禁止命令发送成功");
+                    Console.WriteLine("初始化禁止命令发送成功");
+                    //MessageBox.Show("初始化禁止命令发送成功");
                     return true;
                 }
                 else {
@@ -123,7 +124,7 @@ namespace TVM
                 {
                     //MessageBox.Show("im in!!");
                     CommCmdSender("DISABLE"); //禁用收币器
-                    ClearCurrentCoinsNum();//设置硬币数量
+                    //ClearCurrentCoinsNum();//设置硬币数量
                     //_KeepCheck = false;
                     return true;
                 }
