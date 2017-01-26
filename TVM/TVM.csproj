@@ -161,6 +161,19 @@
   <ItemGroup>
     <Resource Include="image\title.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\360.bmp" />
+    <Resource Include="image\fullsound.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\VRBACK.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\vr.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\SXKJG.bmp" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

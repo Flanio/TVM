@@ -100,7 +100,7 @@ namespace TVM
         private void Button_FullSound(object sender, RoutedEventArgs e)
         {
             ///显示购票界面
-            GetTicketInfo("VR");
+            GetTicketInfo("FullSound");
             //PrintTicket("VR体验");
             ///选择票型
         }
@@ -108,7 +108,7 @@ namespace TVM
         private void Button_VR(object sender, RoutedEventArgs e)
         {
             ///显示购票界面
-            GetTicketInfo("FullSound");
+            GetTicketInfo("VR");
             //PrintTicket("全息音效");
             ///选择票型
         }
@@ -144,18 +144,23 @@ namespace TVM
         /// 
         private void Launch360()
         {
+            IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
+            IMAGE_360.Visibility = Visibility.Visible;
+            IMAGE_VR.Visibility = Visibility.Hidden;
             //1 提示信息
             MBWarning("360");
         }
         private void LaunchVR()
         {
+            IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
             IMAGE_360.Visibility = Visibility.Hidden;
             IMAGE_VR.Visibility = Visibility.Visible;
             MBWarning("VR");
         }
         private void LaunchFullSound() {
+            IMAGE_360.Visibility = Visibility.Hidden;
             IMAGE_VR.Visibility = Visibility.Hidden;
-            IMAGE_360.Visibility = Visibility.Visible;
+            IMAGE_FULLSOUND.Visibility = Visibility.Visible;
             MBWarning("FullSound");
         }
         private async void MBWarning(string item)  //提示窗口
@@ -202,6 +207,9 @@ namespace TVM
 
             else
             {
+                IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
+                IMAGE_360.Visibility = Visibility.Hidden;
+                IMAGE_VR.Visibility = Visibility.Hidden;
                 //退出返回主窗口
             }
         }
@@ -225,6 +233,11 @@ namespace TVM
             //Button_CoinHopper(this, System.Windows.RoutedEvent);
             TicketNum = 1;
             TICKETNUMBER.Text = "1";
+
+            IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
+            IMAGE_360.Visibility = Visibility.Hidden;
+            IMAGE_VR.Visibility = Visibility.Hidden;
+
         }
 
         private void ShowSettingsRight(object sender, RoutedEventArgs e)
@@ -413,6 +426,9 @@ namespace TVM
 
 
         #endregion
+
+
+
 
 
     }
