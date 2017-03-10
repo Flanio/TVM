@@ -10,7 +10,7 @@ namespace TVM
     public class CoinAccepter
     {
         # region 属性
-        Comm CoinComm;
+        CommAccepter CoinComm;
         byte[] strEnable  =    { 0x90, 0x05, 0x01, 0x03, 0x99 };
         byte[] strDisable =    { 0x90, 0x05, 0x02, 0x03, 0x9A };
         byte[] strCheck   =    { 0x90, 0x05, 0x11, 0x03, 0xA9 };
@@ -28,20 +28,20 @@ namespace TVM
         # endregion
 
         #region 构造函数
-        public CoinAccepter()  //构造函数
+        public CoinAccepter(string COM)  //构造函数
         {
             //初始化投币器串口，是否打开？
-            InitializeComm();
+            InitializeComm(COM);
         }
         /// <summary> 串口类初始化
         /// 初始化串口类
         /// </summary>
         /// <returns></returns>
-        private bool InitializeComm()
+        private bool InitializeComm(string COM)
         {
-            CoinComm = new Comm();
+            CoinComm = new CommAccepter();
             //波特率
-            CoinComm.serialPort.PortName = "COM5";
+            CoinComm.serialPort.PortName = COM;
             CoinComm.serialPort.BaudRate = 9600;
             //数据位
             CoinComm.serialPort.DataBits = 8;

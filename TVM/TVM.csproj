@@ -91,7 +91,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CoinAccepter\CoinAccepter.cs" />
-    <Compile Include="CoinAccepter\Comm.cs" />
+    <Compile Include="CoinAccepter\CommAccepter.cs" />
+    <Compile Include="CoinHopper\CoinHopper.cs" />
+    <Compile Include="CoinHopper\CommHopper.cs" />
     <Compile Include="DB\TicketInfo.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -131,7 +133,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\logo.jpg" />
+    <Resource Include="logo.jpg" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -173,6 +175,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\SXKJG.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\logo2.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

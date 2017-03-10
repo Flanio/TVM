@@ -20,7 +20,7 @@
 
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
-            <Controls:Flyout Name="FlyoutTool" Position="Left" Width="600" Theme="Accent" ClosingFinished="Flyout_close" IsPinned="True" >
+            <Controls:Flyout Name="FlyoutTool" Position="left" Width="500" Theme="Accent" CloseButtonVisibility="Visible" ClosingFinished="Flyout_close" IsPinned="False">
                 <!-- Your custom content here -->
                 <Grid Margin="10"
                       Width="500">
@@ -44,14 +44,15 @@
                     <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="票数" FontSize="80"/>
                     <TextBlock Name="TICKETNUMBER" Grid.Row="0" Grid.Column="2"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="1" FontSize="80"/>
 
-                    <Button Grid.Row="1" Grid.Column="1" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="加" FontSize="40" Click="plus" Style="{DynamicResource MetroCircleButtonStyle}" Background="WhiteSmoke"/>
-                    <Button Grid.Row="1" Grid.Column="2" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="减" FontSize="40" Click="minus" Style="{DynamicResource MetroCircleButtonStyle}" Background="WhiteSmoke"/>
+                    <Button Name="ButtonPlus" Grid.Row="1" Grid.Column="1" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="加" FontSize="40" Click="plus" Style="{DynamicResource MetroCircleButtonStyle}" Background="WhiteSmoke"/>
+                    <Button Name="ButtonMinus" Grid.Row="1" Grid.Column="2" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Content="减" FontSize="40" Click="minus" Style="{DynamicResource MetroCircleButtonStyle}" Background="WhiteSmoke"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center"  HorizontalAlignment="Center"  Text="当前硬币数" FontSize="40" />
                     <TextBlock Name="INSTANTCOINNUMBER" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="0" FontSize="40" />
 
-                    <Button Grid.Row="3" Name="ButtonInsert" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="确认开始投币" FontSize="40" Click="Button_start_insert"/>
-                    <Button Grid.Row="3" Name="Buttonhopper" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="我要退币" FontSize="40" Visibility="Collapsed" Click="Button_CoinHopper"/>
+                    <Button Grid.Row="3" Name="ButtonInsert" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="点我开始投币" FontSize="40" Click="Button_start_insert" BorderBrush="#FFE6E6E6" />
+                    <Button Grid.Row="3" Name="Buttonhopper" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="我要退币" FontSize="40" Visibility="Collapsed" Click="Button_CoinHopper" BorderBrush="#FFE6E6E6"/>
+                    <Button Grid.Row="4" Name="ButtonBack" Grid.Column="1" Grid.ColumnSpan="2" Height="100" Width="300" Content="返回" FontSize="40" Visibility="Collapsed"></Button>
                 </Grid>
             </Controls:Flyout>
             <Controls:Flyout Header="360自行车"
@@ -211,6 +212,7 @@
                                TitleFontSize="20" Margin="28,120,522,390"
                                Click="Button_360" >
                     <Grid>
+                        <TextBlock Text="5元/次" Width="80" Height="35" FontSize="22" Margin="-90,12,0,40" HorizontalAlignment="Left"></TextBlock>
                         <Image Source="image/360.jpg" Visibility="Visible" HorizontalAlignment="Right" Width="80" Height="80" Margin="0,-1,-90,1"/>
                     </Grid>
                 </Controls:Tile>
@@ -219,6 +221,7 @@
                                TitleFontSize="20" Margin="28,260,522,272"
                                Click="Button_VR">
                     <Grid>
+                        <TextBlock Text="10元/次" Width="80" Height="35" FontSize="22" Margin="-90,12,0,40" HorizontalAlignment="Left"></TextBlock>
                         <Image Source="image/vr.jpg" Visibility="Visible" HorizontalAlignment="Right" Width="80" Height="80" Margin="0,-1,-90,1"/>
                     </Grid>
                 </Controls:Tile>
@@ -228,14 +231,20 @@
                                TitleFontSize="20" Margin="53,400,547,124"
                                Click="Button_FullSound">
                     <Grid>
+                        <TextBlock Text="5元/次" Width="80" Height="35" FontSize="22" Margin="-90,12,0,40" HorizontalAlignment="Left"></TextBlock>
                         <Image Source="image/Fullsound1.jpg" Visibility="Visible" HorizontalAlignment="Right" Width="80" Height="80" Margin="0,-1,-90,1"/>
                     </Grid>
                 </Controls:Tile>
                 <Image Name="IMAGE_360" HorizontalAlignment="Left" Height="400" Margin="280,130,0,0" VerticalAlignment="Top" Width="500" Source="image/360.bmp" Visibility="Collapsed"/>
                 <Image Name="IMAGE_VR" HorizontalAlignment="Left" Height="400" Margin="280,130,0,0" VerticalAlignment="Top" Width="500" Source="image/vr.bmp" Visibility="Collapsed"/>
                 <Image Name="IMAGE_FULLSOUND" HorizontalAlignment="Left" Height="400" Margin="280,130,0,0" VerticalAlignment="Top" Width="500" Source="image/fullsound.bmp" Visibility="Collapsed"/>
-                <Image Source="image/title.png" Margin="377,26,23,534" Height="60" Width="400"></Image>
-                <TextBlock HorizontalAlignment="Left"  Name="TicketPrintStatus" Margin="386,321,0,0" TextWrapping="Wrap" Text="ticket is printing"  FontSize="40" VerticalAlignment="Top" Height="68" Width="317" Visibility="Collapsed"/>
+                <TextBlock HorizontalAlignment="Left"  Name="TicketPrintStatus" Margin="449,514,0,0" TextWrapping="Wrap" Text="正在打印"  FontSize="50"  VerticalAlignment="Top" Height="68" Width="317" Visibility="Collapsed" Foreground="White"/>
+                <Border BorderBrush="Black" Background="Black" Opacity="0.05" BorderThickness="1" HorizontalAlignment="Left" Height="110" Margin="10,10,0,0" VerticalAlignment="Top" Width="780">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="0" Color="#FF414141" BlurRadius="8"/>
+                    </Border.Effect>
+                </Border>
+                <Image Source="image/title.png" Margin="369,21,31,535" Width="400" Stretch="Fill"/>
             </Grid>
         </Viewbox>
     </Controls:MetroContentControl>

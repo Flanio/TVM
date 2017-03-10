@@ -29,9 +29,12 @@ namespace TVM
         # region 属性
 
         CoinAccepter coinAccepter;  //投币器类
+        CoinHopper coinHopper;
         int CoinNum = 5;
         int TicketNum = 1;
         int PreCoinNum = 0;
+        string TicketName = "";
+        int Factor =5;
 
         //退币标志位
         bool COINHOPPER = false;
@@ -49,6 +52,8 @@ namespace TVM
         /// </summary>
         private string statusText = "1";
 
+        MessageDialogResult result;
+
         # endregion
 
         #region 构造函数
@@ -60,8 +65,10 @@ namespace TVM
             //TRY CATCH
             // PRINTER_OK = true
             //2.初始化投币器   采用串口通讯   开启后，串口一直处于打开状态，通过控制投币器使能来进行控制
-            try { coinAccepter = new CoinAccepter(); }
+            try { coinAccepter = new CoinAccepter("COM7"); }  //初始化选择COM口
             catch { MessageBox.Show("投币器初始化失败"); Application.Current.Shutdown(); }
+            try { coinHopper = new CoinHopper("COM5"); }
+            catch { MessageBox.Show("退币器初始化失败"); Application.Current.Shutdown(); }
             //TRY CATCH
             // COIN_RECEIVER_OK = true
             //3.初始化退币器
@@ -114,7 +121,7 @@ namespace TVM
         }
         # endregion
 
-        # region 票面信息显示
+        # region 票面信息显示 flyout 窗口
         /// <summary>
         /// 票面信息显示
         /// </summary>
@@ -144,6 +151,8 @@ namespace TVM
         /// 
         private void Launch360()
         {
+            TicketName = "360自行车";
+            Factor = 5;
             IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
             IMAGE_360.Visibility = Visibility.Visible;
             IMAGE_VR.Visibility = Visibility.Hidden;
@@ -152,12 +161,16 @@ namespace TVM
         }
         private void LaunchVR()
         {
+            TicketName = "VR";
+            Factor = 10;
             IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
             IMAGE_360.Visibility = Visibility.Hidden;
             IMAGE_VR.Visibility = Visibility.Visible;
             MBWarning("VR");
         }
         private void LaunchFullSound() {
+            TicketName = "全息音效";
+            Factor = 5;
             IMAGE_360.Visibility = Visibility.Hidden;
             IMAGE_VR.Visibility = Visibility.Hidden;
             IMAGE_FULLSOUND.Visibility = Visibility.Visible;
@@ -169,15 +182,34 @@ namespace TVM
             // The package is only used by the demo and not a dependency of the library!
             var mySettings = new MetroDialogSettings()
             {
-                AffirmativeButtonText = "YES",
-                NegativeButtonText = "NOP",
-                DialogMessageFontSize = 40.0,
+                AffirmativeButtonText = "确定",
+                NegativeButtonText = "取消",
+                DialogMessageFontSize = 30.0,
                 //FirstAuxiliaryButtonText = "CANCEL",
                 ColorScheme = MetroDialogOptions.ColorScheme
             };
 
-            MessageDialogResult result = await this.ShowMessageAsync("警告", "注意，本项目具有一定危险性",
-                MessageDialogStyle.AffirmativeAndNegative, mySettings);
+
+            switch(item)
+            {
+                case "360":
+                    result = await this.ShowMessageAsync("提示", "注意，本项目具有一定危险性。心脏病、高血压患者紧致体验。体验券5元一张。只接受硬币。",
+                    MessageDialogStyle.AffirmativeAndNegative, mySettings);
+                    break;
+                case "VR":
+                    result = await this.ShowMessageAsync("提示", "注意，本项目具有一定危险性。心脏病、高血压患者紧致体验。体验券10元一张。只接受硬币。",
+                    MessageDialogStyle.AffirmativeAndNegative, mySettings);
+                    break;
+                case "FullSound":
+                    result = await this.ShowMessageAsync("提示", "注意，本项目具有一定危险性。心脏病、高血压患者紧致体验。体验券5元一张。只接受硬币。",
+                    MessageDialogStyle.AffirmativeAndNegative, mySettings);
+                    break;
+                case "OTHER":
+                    break;
+                default:
+                    break;
+            }
+
 
             if (result == MessageDialogResult.Affirmative)
             {
@@ -187,6 +219,9 @@ namespace TVM
                 // Display(item_list)
                 //3 等待用户选择  数量  获取硬币数量 int coinNum
                 // if button_OK  clicked 确认支付后，开始进入投币接收状态
+                ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+                ButtonPlus.Visibility = System.Windows.Visibility.Visible;
+                ButtonMinus.Visibility = System.Windows.Visibility.Visible;
                 switch (item)
                 {
                     case "360":
@@ -203,8 +238,6 @@ namespace TVM
                         break;
                 }
             }
-
-
             else
             {
                 IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
@@ -223,29 +256,32 @@ namespace TVM
 
             flyout.IsOpen = !flyout.IsOpen;
         }
-
         private void Flyout_close(object sender, RoutedEventArgs e)
         {
             //退币
-            //if(coinAccepter.GetCurrentCoinsNum != 0)
-            //{ } 此处有bug 投币过程中不能退出
+            if (coinAccepter.GetCurrentCoinsNum() != 0)
+            {
+                Hopper();
+                //coinHopper.returnCoin(coinAccepter.GetCurrentCoinsNum());
+                //CoinHopper();//Button_CoinHopper(this,System.Windows.)//调用退币模块
+                //FlyoutTool.CloseCommand.Execute
+            } //此处有bug 投币过程中不能退出
             //threadCoinAccepter.Abort();
-            //Button_CoinHopper(this, System.Windows.RoutedEvent);
-            TicketNum = 1;
-            TICKETNUMBER.Text = "1";
+            //else
+            {
+                TicketNum = 1;
+                TICKETNUMBER.Text = "1";
 
-            IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
-            IMAGE_360.Visibility = Visibility.Hidden;
-            IMAGE_VR.Visibility = Visibility.Hidden;
-
+                IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
+                IMAGE_360.Visibility = Visibility.Hidden;
+                IMAGE_VR.Visibility = Visibility.Hidden;
+            }
         }
-
         private void ShowSettingsRight(object sender, RoutedEventArgs e)
         {
             var flyout = (Flyout)this.Flyouts.Items[1];
             flyout.Position = Position.Right;
         }
-
         private void ShowSettingsLeft(object sender, RoutedEventArgs e)
         {
             var flyout = (Flyout)this.Flyouts.Items[1];
@@ -255,38 +291,30 @@ namespace TVM
         #endregion
 
         #region UI交互接口
+
+
         private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
         {
-            ButtonInsert.Visibility = System.Windows.Visibility.Visible;
-            Buttonhopper.Visibility = System.Windows.Visibility.Collapsed;
-            coinAccepter.setReject();//禁止收币功能
-            COINHOPPER = true;//退币状态置位1
-            //投币线程强制终止
-            threadCoinAccepter.Abort();
-            //退币
-            //调用退币模块
-            CoinNum = coinAccepter.GetCurrentCoinsNum(); //获取当前收币模块中的硬币数量
-            MessageBox.Show("退币数量为 " + CoinNum.ToString() + "\n点击确认后开始退币");
-            COINHOPPER = false;
-
-            TicketNum = 1;
-            CoinNum = 5;
-            //CoinHopper(int CoinNum); //退币 数量为CoinNum
+            Hopper();
         }
 
         private void Button_start_insert(object sender, RoutedEventArgs e)
         {
-            Buttonhopper.Visibility = System.Windows.Visibility.Visible;
+            //FlyoutTool.CloseButtonVisibility = System.Windows.Visibility.Hidden;
+            FlyoutTool.IsPinned = true;
+            Buttonhopper.Visibility = System.Windows.Visibility.Visible; //取消退币按钮，改为直接点击退出并退币。
             ButtonInsert.Visibility = System.Windows.Visibility.Collapsed;
+            ButtonPlus.Visibility   = System.Windows.Visibility.Collapsed;
+            ButtonMinus.Visibility  = System.Windows.Visibility.Collapsed;
             TicketNum = int.Parse( TICKETNUMBER.Text );
-            CoinNum = TicketNum * 5;
-            AcceptCoin(CoinNum);  //4 等待硬币投入 开辟一个新线程
+            CoinNum = TicketNum * Factor;
+            AcceptCoinThread(CoinNum);  //4 等待硬币投入 开辟一个新线程
         }
 
         private void plus(object sender, RoutedEventArgs e)
         {
             TicketNum++;
-            CoinNum = TicketNum * 5;
+            CoinNum = TicketNum * Factor;
             TICKETNUMBER.Text = TicketNum.ToString();
         }
 
@@ -295,7 +323,7 @@ namespace TVM
             if (TicketNum > 1)
             {
                 TicketNum--;
-                CoinNum = TicketNum * 5;                
+                CoinNum = TicketNum * Factor;                
             }
             TICKETNUMBER.Text = TicketNum.ToString();
         }
@@ -306,13 +334,13 @@ namespace TVM
         /// 接收硬币函数
         /// </summary>
         /// <param name="CoinNum"></param>
-        public void AcceptCoin(int CoinNum)
+        public void AcceptCoinThread(int CoinNum)
         {
             //if (threadCoinAccepter == null)
             {
                 //MessageBox.Show("new coin thread");
                 threadCoinAccepter = new Thread(new ParameterizedThreadStart(WaitForCoins));
-                MessageBox.Show(CoinNum.ToString());
+                //MessageBox.Show(CoinNum.ToString());
                 threadCoinAccepter.Start(CoinNum);
             }
         }
@@ -337,18 +365,24 @@ namespace TVM
                     INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = coinAccepter.GetCurrentCoinsNum().ToString()));
                     //coinAccepter.ClearCurrentCoinsNum();
                     //PrintTicket("360自行车");
-                    ButtonInsert.Dispatcher.Invoke(new Action(() => ButtonInsert.Visibility = System.Windows.Visibility.Visible));
-                    ButtonInsert.Dispatcher.Invoke(new Action(() => Buttonhopper.Visibility = System.Windows.Visibility.Collapsed));
-                    coinAccepter.ClearCurrentCoinsNum();
+                    Buttonhopper.Dispatcher.Invoke(new Action(() => Buttonhopper.Visibility = System.Windows.Visibility.Collapsed));
                     ShowPrintInfo();
-                    //this.Dispatcher.BeginInvoke(new Action(() => this.ShowMessageAsync("hello world","hello")));
-                    //重置无效？？
-                    MessageBox.Show("pre"+CoinNum.ToString()+ "  pre"+TicketNum.ToString());
+                    PrintTicket(TicketName, TicketNum,Factor);
+                    //打印之后必须清除当前硬币数量  存在bug！！
+                    coinAccepter.ClearCurrentCoinsNum();
+                    ButtonInsert.Dispatcher.Invoke(new Action(() => ButtonInsert.Visibility = System.Windows.Visibility.Visible));
+
+                    coinAccepter.ClearCurrentCoinsNum();
+
                     TicketNum = 1;
                     CoinNum = 5;
+                    //FlyoutTool.CloseButtonVisibility = System.Windows.Visibility.Hidden;
                     INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = "0"));
                     TICKETNUMBER.Dispatcher.Invoke(new Action(() => TICKETNUMBER.Text = "1"));
-                    //coinAccepter.setReject();//禁用投币器
+                    
+                    FlyoutTool.Dispatcher.Invoke(new Action(() =>  FlyoutTool.IsPinned = false));
+                    ButtonPlus.Dispatcher.Invoke(new Action(() => ButtonPlus.Visibility = System.Windows.Visibility.Visible));
+                    ButtonMinus.Dispatcher.Invoke(new Action(() => ButtonMinus.Visibility = System.Windows.Visibility.Visible));
                     break;
                 }
                 else
@@ -369,21 +403,67 @@ namespace TVM
 
         private void ShowPrintInfo()
         {
-            //var mySettings = new MetroDialogSettings()
-            //{
-            //    AffirmativeButtonText = "YES",
-            //    NegativeButtonText = "NOP",
-            //    DialogMessageFontSize = 40.0,
-            //    //FirstAuxiliaryButtonText = "CANCEL",
-            //    ColorScheme = MetroDialogOptions.ColorScheme
-            //};
             TicketPrintStatus.Dispatcher.Invoke(new Action(() => TicketPrintStatus.Visibility=System.Windows.Visibility.Visible));
             Thread.Sleep(2000);
             TicketPrintStatus.Dispatcher.Invoke(new Action(() => TicketPrintStatus.Visibility = System.Windows.Visibility.Collapsed));
-            //this.Close();
-            //await this.ShowMessageAsync("警告", "注意，本项目具有一定危险性");
         }
 
+        # endregion
+
+        #region 退币
+        private void Hopper()
+        {
+            Thread.Sleep(1000);
+            Buttonhopper.Visibility = System.Windows.Visibility.Collapsed; //取消退币按钮，改为直接点击退出并退币。
+            ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+            ButtonPlus.Visibility = System.Windows.Visibility.Visible;
+            ButtonMinus.Visibility = System.Windows.Visibility.Visible;
+            COINHOPPER = true;//退币状态置位1
+            HopperThread();
+            COINHOPPER = false;//退币状态置位0
+        }
+
+        private void HopperThread()           
+        //if (threadCoinAccepter == null)
+        {
+            //MessageBox.Show("new coin thread");
+            threadCoinHopper = new Thread(new ParameterizedThreadStart(CoinHopper));
+            //MessageBox.Show(CoinNum.ToString());
+            CoinNum = coinAccepter.GetCurrentCoinsNum();
+            threadCoinHopper.Start(CoinNum);
+        }
+
+        private void CoinHopper(object CoinNum)
+        {
+            try
+            {
+                ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+                Buttonhopper.Visibility = System.Windows.Visibility.Collapsed;
+            }
+            catch { }
+            try
+            {
+                coinAccepter.setReject();//禁止收币功能
+                //投币线程强制终止
+                threadCoinAccepter.Abort();
+            }
+            catch { }
+            //退币
+            //调用退币模块
+            CoinNum = coinAccepter.GetCurrentCoinsNum();
+           // MessageBox.Show("退币数量为 " + CoinNum.ToString() + "\n点击确认后开始退币");
+            if ((int)CoinNum != 0)
+            {
+                coinHopper.returnCoin((int)CoinNum);
+                TicketNum = 1;
+                CoinNum = 5;
+                //TICKETNUMBER.Text = "1";
+                //CoinHopper(int CoinNum); //退币 数量为CoinNum
+                //还需要清零当前硬币数量
+                coinAccepter.ClearCurrentCoinsNum();
+                FlyoutTool.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = "0"));
+            }
+        }
         # endregion
 
         #region 数值更新
@@ -422,14 +502,7 @@ namespace TVM
                 }
             }
         }
-
-
-
         #endregion
-
-
-
-
 
     }
 }

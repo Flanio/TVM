@@ -12,7 +12,7 @@ using System.Windows;
 namespace TVM
 {
     //http://www.cnblogs.com/binfire/archive/2011/10/08/2201973.html
-    public class Comm
+    public class CommAccepter
     {
         public delegate void EventHandle(byte[] readBuffer);
         public event EventHandle DataReceived;
@@ -32,12 +32,12 @@ namespace TVM
         byte[] strDown = { 0x90, 0x05, 0x14, 0x03, 0xAC };       //功能被关闭
         byte[] strIdling = { 0x90, 0x05, 0x11, 0x03, 0xA9 };     //功能正常
 
-        public Comm()  //构造函数
+        public CommAccepter()  //构造函数
         {
             serialPort = new SerialPort();
             threadReading = null;
             _keepReading = false;
-            DataReceived += new Comm.EventHandle(commDataReceived);
+            DataReceived += new CommAccepter.EventHandle(commDataReceived);
             _coin = 0;
         }
 
@@ -56,7 +56,7 @@ namespace TVM
                 _keepReading = true;
                 threadReading = new Thread(new ThreadStart(ReadPort));
                 threadReading.Start();
-                Console.WriteLine("start reading serial port");
+                Console.WriteLine("start reading serial accept port");
                 //MessageBox.Show("START READING");
             }
         }
@@ -158,15 +158,16 @@ namespace TVM
                 //string receive = ByteToStr(readBuffer);
                 //MessageBox.Show(Encoding.UTF8.GetString(readBuffer));
                 string receivedData = byteToHexStr(readBuffer);
-                Console.WriteLine("yahoo "+receivedData );
-                Console.WriteLine(byteToHexStr(strCoin));
+                Console.Write("收到来自投币器的应答字节: "+ receivedData +"。应答内容为：" );
+                //Console.WriteLine(byteToHexStr(strCoin));
+                //strCoin为字符串常量
                 if (string.Equals(byteToHexStr(strCoin), receivedData))
                 {
                     _coin++;//收入一枚硬币
                     Console.WriteLine("收入一枚硬币: " + _coin.ToString()); 
                 }
                 else if (string.Equals(byteToHexStr(strAck), receivedData))
-                { Console.WriteLine("投币器有应答"); }
+                { Console.WriteLine("投币器收到命令"); }
                 else if (string.Equals(byteToHexStr(strNak), receivedData))
                 { Console.WriteLine("投币器没有应答"); }
                 else if (string.Equals(byteToHexStr(strDown), receivedData))
@@ -176,7 +177,7 @@ namespace TVM
                 else 
                 {
                     //此处需要建立日志文件，以便日后查看错误
-                    Console.WriteLine(System.DateTime.Now.ToString() + "something wrong:" + receivedData);
+                    Console.WriteLine("日志记录： " + System.DateTime.Now.ToString() + "-----something wrong:-----" + receivedData);
                 }
                 //Console.WriteLine("yahoo " + StringToHexString(receive,Encoding.UTF8));// ByteToStr(readBuffer));
                 # region debug
