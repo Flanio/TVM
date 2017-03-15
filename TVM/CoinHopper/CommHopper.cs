@@ -21,16 +21,7 @@ namespace TVM
         Thread threadReading;
         volatile bool _keepReading;
 
-        public int _coin { get; set; }
-
-        byte[] strEnable = { 0x05, 0x10, 0x03, 0x10, 0x03, 0x2B };  //使能命令
-        byte[] strDisable = { 0x90, 0x05, 0x02, 0x03, 0x9A }; //禁用功能命令
-        byte[] strCheck = { 0x90, 0x05, 0x11, 0x03, 0xA9 };  //状态查询命令
-        byte[] strAck = { 0x90, 0x05, 0x50, 0x03, 0xE8 };    //应答返回
-        byte[] strNak = { 0x90, 0x05, 0x4B, 0x03, 0xE3 };    //没有应答
-        byte[] strCoin = { 0x90, 0x06, 0x12, 0x03, 0x03, 0xAE };   //获得硬币
-        byte[] strDown = { 0x90, 0x05, 0x14, 0x03, 0xAC };       //功能被关闭
-        byte[] strIdling = { 0x90, 0x05, 0x11, 0x03, 0xA9 };     //功能正常
+        byte[] strAck= { 0x05, 0x10, 0x03, 0x10, 0x01, 0x29 };//debug
 
         public CommHopper()  //构造函数
         {
@@ -38,7 +29,6 @@ namespace TVM
             threadReading = null;
             _keepReading = false;
             DataReceived += new CommHopper.EventHandle(commDataReceived);
-            _coin = 0;
         }
 
         public bool IsOpen
@@ -161,19 +151,12 @@ namespace TVM
                 Console.Write("收到来自投币器的应答字节: "+ receivedData +"。应答内容为：" );
                 //Console.WriteLine(byteToHexStr(strCoin));
                 //strCoin为字符串常量
-                if (string.Equals(byteToHexStr(strCoin), receivedData))
+                if (string.Equals(byteToHexStr(strAck), receivedData))
                 {
-                    _coin++;//收入一枚硬币
-                    Console.WriteLine("收入一枚硬币: " + _coin.ToString()); 
+                    //退币器答复指令已收到
+                    //_coin++;//收入一枚硬币
+                    //Console.WriteLine("收入一枚硬币: " + _coin.ToString()); 
                 }
-                else if (string.Equals(byteToHexStr(strAck), receivedData))
-                { Console.WriteLine("投币器收到命令"); }
-                else if (string.Equals(byteToHexStr(strNak), receivedData))
-                { Console.WriteLine("投币器没有应答"); }
-                else if (string.Equals(byteToHexStr(strDown), receivedData))
-                { Console.WriteLine("投币器被关闭"); }
-                else if (string.Equals(byteToHexStr(strIdling), receivedData))
-                { Console.WriteLine("投币器等待接受硬币"); }
                 else 
                 {
                     //此处需要建立日志文件，以便日后查看错误

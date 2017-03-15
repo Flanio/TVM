@@ -10,7 +10,7 @@ namespace TVM
     public class CoinAccepter
     {
         # region 属性
-        CommAccepter CoinComm;
+        CommAccepter CoinAccepterComm;
         byte[] strEnable  =    { 0x90, 0x05, 0x01, 0x03, 0x99 };
         byte[] strDisable =    { 0x90, 0x05, 0x02, 0x03, 0x9A };
         byte[] strCheck   =    { 0x90, 0x05, 0x11, 0x03, 0xA9 };
@@ -39,19 +39,19 @@ namespace TVM
         /// <returns></returns>
         private bool InitializeComm(string COM)
         {
-            CoinComm = new CommAccepter();
+            CoinAccepterComm = new CommAccepter();
             //波特率
-            CoinComm.serialPort.PortName = COM;
-            CoinComm.serialPort.BaudRate = 9600;
+            CoinAccepterComm.serialPort.PortName = COM;
+            CoinAccepterComm.serialPort.BaudRate = 9600;
             //数据位
-            CoinComm.serialPort.DataBits = 8;
+            CoinAccepterComm.serialPort.DataBits = 8;
             //两个停止位
-            CoinComm.serialPort.StopBits = System.IO.Ports.StopBits.One;
+            CoinAccepterComm.serialPort.StopBits = System.IO.Ports.StopBits.One;
             //无奇偶校验位
-            CoinComm.serialPort.Parity = System.IO.Ports.Parity.None;
-            CoinComm.serialPort.ReadTimeout = 100;
-            CoinComm.serialPort.WriteTimeout = -1; 
-            if (CoinComm.Open()) {
+            CoinAccepterComm.serialPort.Parity = System.IO.Ports.Parity.None;
+            CoinAccepterComm.serialPort.ReadTimeout = 100;
+            CoinAccepterComm.serialPort.WriteTimeout = -1; 
+            if (CoinAccepterComm.Open()) {
                 //禁用硬币器
                 if (CommCmdSender("DISABLE")) {
                     Console.WriteLine("初始化禁止命令发送成功");
@@ -84,12 +84,12 @@ namespace TVM
             switch (Cmd)
             {
                 case "ENABLE":
-                    return CoinComm.WritePort(strEnable, 0, 5);
+                    return CoinAccepterComm.WritePort(strEnable, 0, 5);
                 case "DISABLE":
-                    return CoinComm.WritePort(strDisable, 0, 5);
+                    return CoinAccepterComm.WritePort(strDisable, 0, 5);
                 case "CHECK":
                     {
-                        return CoinComm.WritePort(strCheck, 0, 5);
+                        return CoinAccepterComm.WritePort(strCheck, 0, 5);
                     }
                 default:
                     return false;
@@ -154,14 +154,14 @@ namespace TVM
         /// <returns></returns>
         public int GetCurrentCoinsNum() 
         {
-            return _currentCoinsNum = CoinComm._coin;
+            return _currentCoinsNum = CoinAccepterComm._coin;
         }
         /// <summary>硬币数量清零
         /// 硬币数量清零
         /// </summary>
         public void ClearCurrentCoinsNum()
         {
-            CoinComm._coin = 0;
+            CoinAccepterComm._coin = 0;
             _currentCoinsNum = 0;
         }
         #endregion
