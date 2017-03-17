@@ -30,6 +30,7 @@ namespace TVM
 
         CoinAccepter coinAccepter;  //投币器类
         CoinHopper coinHopper;
+        Printer printer;
         int CoinNum = 5;
         int TicketNum = 1;
         int PreCoinNum = 0;
@@ -69,6 +70,9 @@ namespace TVM
             catch { MessageBox.Show("投币器初始化失败"); Application.Current.Shutdown(); }
             try { coinHopper = new CoinHopper("COM5"); }
             catch { MessageBox.Show("退币器初始化失败"); Application.Current.Shutdown(); }
+            try { printer = new Printer(); }
+            catch { MessageBox.Show("打印机初始化失败"); Application.Current.Shutdown(); }
+
             //TRY CATCH
             // COIN_RECEIVER_OK = true
             //3.初始化退币器
@@ -256,7 +260,7 @@ namespace TVM
 
             flyout.IsOpen = !flyout.IsOpen;
         }
-        private void Flyout_close(object sender, RoutedEventArgs e)
+        private void FlyoutClosed(object sender, RoutedEventArgs e)
         {
             //退币
             if (coinAccepter.GetCurrentCoinsNum() != 0)
@@ -269,14 +273,15 @@ namespace TVM
             //threadCoinAccepter.Abort();
             //else
             {
-                TicketNum = 1;
-                TICKETNUMBER.Text = "1";
-
-                IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
-                IMAGE_360.Visibility = Visibility.Hidden;
-                IMAGE_VR.Visibility = Visibility.Hidden;
+                ContentViewStatus("FlyoutClosed");
             }
         }
+        
+        private void CloseFlyout()
+        {
+            FlyoutTool.IsOpen = false;
+        }
+
         private void ShowSettingsRight(object sender, RoutedEventArgs e)
         {
             var flyout = (Flyout)this.Flyouts.Items[1];
@@ -296,16 +301,13 @@ namespace TVM
         private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
         {
             Hopper();
+            CloseFlyout();
         }
 
         private void Button_start_insert(object sender, RoutedEventArgs e)
         {
             //FlyoutTool.CloseButtonVisibility = System.Windows.Visibility.Hidden;
-            FlyoutTool.IsPinned = true;
-            Buttonhopper.Visibility = System.Windows.Visibility.Visible; //取消退币按钮，改为直接点击退出并退币。
-            ButtonInsert.Visibility = System.Windows.Visibility.Collapsed;
-            ButtonPlus.Visibility   = System.Windows.Visibility.Collapsed;
-            ButtonMinus.Visibility  = System.Windows.Visibility.Collapsed;
+            ContentViewStatus("StartInsert");
             TicketNum = int.Parse( TICKETNUMBER.Text );
             CoinNum = TicketNum * Factor;
             AcceptCoinThread(CoinNum);  //4 等待硬币投入 开辟一个新线程
@@ -313,9 +315,12 @@ namespace TVM
 
         private void plus(object sender, RoutedEventArgs e)
         {
-            TicketNum++;
-            CoinNum = TicketNum * Factor;
-            TICKETNUMBER.Text = TicketNum.ToString();
+            if (TicketNum < 5)
+            {
+                TicketNum++;
+                CoinNum = TicketNum * Factor;
+                TICKETNUMBER.Text = TicketNum.ToString();
+            }
         }
 
         private void minus(object sender, RoutedEventArgs e)
@@ -326,6 +331,37 @@ namespace TVM
                 CoinNum = TicketNum * Factor;                
             }
             TICKETNUMBER.Text = TicketNum.ToString();
+        }
+
+        private void ContentViewStatus(string Option)
+        {
+            switch (Option)
+            {
+                case "StartInsert":
+                    FlyoutTool.IsPinned = true;
+                    FlyoutTool.CloseButtonVisibility = System.Windows.Visibility.Hidden;
+                    Buttonhopper.Visibility = System.Windows.Visibility.Visible; //取消退币按钮，改为直接点击退出并退币。
+                    ButtonInsert.Visibility = System.Windows.Visibility.Collapsed;
+                    ButtonPlus.Visibility   = System.Windows.Visibility.Collapsed;
+                    ButtonMinus.Visibility  = System.Windows.Visibility.Collapsed;
+                    break;
+                case "Hopper":
+                    Buttonhopper.Visibility = System.Windows.Visibility.Collapsed; //取消退币按钮，改为直接点击退出并退币。
+                    ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+                    ButtonPlus.Visibility = System.Windows.Visibility.Visible;
+                    ButtonMinus.Visibility = System.Windows.Visibility.Visible;
+                    break;
+                case "FlyoutClosed":
+                    TicketNum = 1;
+                    TICKETNUMBER.Text = "1";
+
+                    IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
+                    IMAGE_360.Visibility = Visibility.Hidden;
+                    IMAGE_VR.Visibility = Visibility.Hidden;
+                    break;
+                default:
+                    break;
+            }
         }
         #endregion
 
@@ -367,7 +403,8 @@ namespace TVM
                     //PrintTicket("360自行车");
                     Buttonhopper.Dispatcher.Invoke(new Action(() => Buttonhopper.Visibility = System.Windows.Visibility.Collapsed));
                     ShowPrintInfo();
-                    PrintTicket(TicketName, TicketNum,Factor);
+                    printer.PrintTicket(TicketName, TicketNum,Factor);
+                    CloseFlyout(); //打印后自动返回主界面
                     //打印之后必须清除当前硬币数量  存在bug！！
                     coinAccepter.ClearCurrentCoinsNum();
                     ButtonInsert.Dispatcher.Invoke(new Action(() => ButtonInsert.Visibility = System.Windows.Visibility.Visible));
@@ -380,7 +417,7 @@ namespace TVM
                     INSTANTCOINNUMBER.Dispatcher.Invoke(new Action(() => INSTANTCOINNUMBER.Text = "0"));
                     TICKETNUMBER.Dispatcher.Invoke(new Action(() => TICKETNUMBER.Text = "1"));
                     
-                    FlyoutTool.Dispatcher.Invoke(new Action(() =>  FlyoutTool.IsPinned = false));
+                    //FlyoutTool.Dispatcher.Invoke(new Action(() =>  FlyoutTool.IsPinned = false));
                     ButtonPlus.Dispatcher.Invoke(new Action(() => ButtonPlus.Visibility = System.Windows.Visibility.Visible));
                     ButtonMinus.Dispatcher.Invoke(new Action(() => ButtonMinus.Visibility = System.Windows.Visibility.Visible));
                     break;
@@ -396,9 +433,9 @@ namespace TVM
             }
             //MessageBox.Show("threadabort");
             //停止投币器线程
-            Console.WriteLine( "current thread " + threadCoinAccepter.Name);
+            Console.WriteLine( "current thread name" + threadCoinAccepter.Name);
             threadCoinAccepter.Abort();
-            Console.WriteLine( "current thread " + threadCoinAccepter.ToString());
+            Console.WriteLine( "current thread name" + threadCoinAccepter.Name);
         }
 
         private void ShowPrintInfo()
@@ -414,10 +451,7 @@ namespace TVM
         private void Hopper()
         {
             Thread.Sleep(1000);
-            Buttonhopper.Visibility = System.Windows.Visibility.Collapsed; //取消退币按钮，改为直接点击退出并退币。
-            ButtonInsert.Visibility = System.Windows.Visibility.Visible;
-            ButtonPlus.Visibility = System.Windows.Visibility.Visible;
-            ButtonMinus.Visibility = System.Windows.Visibility.Visible;
+            ContentViewStatus("Hopper");//按键显示状态更新
             COINHOPPER = true;//退币状态置位1
             HopperThread();
             COINHOPPER = false;//退币状态置位0
@@ -435,12 +469,12 @@ namespace TVM
 
         private void CoinHopper(object CoinNum)
         {
-            try
-            {
-                ButtonInsert.Visibility = System.Windows.Visibility.Visible;
-                Buttonhopper.Visibility = System.Windows.Visibility.Collapsed;
-            }
-            catch { }
+            //try
+            //{
+            //    ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+            //    Buttonhopper.Visibility = System.Windows.Visibility.Collapsed;
+            //}
+            //catch { }
             try
             {
                 coinAccepter.setReject();//禁止收币功能

@@ -20,7 +20,7 @@
 
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
-            <Controls:Flyout Name="FlyoutTool" Position="left" Width="500" Theme="Accent" CloseButtonVisibility="Visible" ClosingFinished="Flyout_close" IsPinned="False">
+            <Controls:Flyout Name="FlyoutTool" Position="left" Width="500" Theme="Accent" CloseButtonVisibility="Visible" ClosingFinished="FlyoutClosed" IsPinned="False">
                 <!-- Your custom content here -->
                 <Grid Margin="10"
                       Width="500">
@@ -206,7 +206,7 @@
     </Controls:MetroWindow.Flyouts>
     <Controls:MetroContentControl>
         <Viewbox>
-            <Grid>
+                <Grid>
                 <Controls:Tile Title="360自行车"
                                Style="{StaticResource LargeTileStyle}"
                                TitleFontSize="20" Margin="28,120,522,390"
@@ -247,5 +247,7 @@
                 <Image Source="image/title.png" Margin="369,21,31,535" Width="400" Stretch="Fill"/>
             </Grid>
         </Viewbox>
+
     </Controls:MetroContentControl>
+    
 </Controls:MetroWindow>

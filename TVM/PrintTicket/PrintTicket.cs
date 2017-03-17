@@ -12,8 +12,11 @@ using System.Windows;
 
 namespace TVM
 {
-    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
+    public class Printer
     {
+        # region 属性
+        private string dt;
+        #endregion
         # region 门票打印模块
 
         # region DLL import
@@ -41,7 +44,7 @@ namespace TVM
         /// 门票打印
         /// </summary>
         /// <param name="ticketName">门票项目名称</param>
-        private void PrintTicket(string ticketName,int ticketNum,int factor)
+        public void PrintTicket(string ticketName,int ticketNum,int factor)
         {
             if (SetPrintport("USB001", 38400).ToString().Equals("1"))
                 MessageBox.Show("SetPrintport Failed");
@@ -61,7 +64,7 @@ namespace TVM
                 PrintString("----------------------", 0);
                 PrintFeedline(10);
                 PrintCutpaper(0);
-                Thread.Sleep(2000); //延时打印 否则出错
+                Thread.Sleep(2000); //延时打印 否则出错 打印每张票时间间隔为2s
             }
             SetClose();
         }
