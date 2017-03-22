@@ -134,6 +134,7 @@ namespace TVM
         {
             switch (item)
             {
+                    //显示剩余票数，时间段
                 case "360":
                     Launch360();
                     break;
@@ -223,9 +224,7 @@ namespace TVM
                 // Display(item_list)
                 //3 等待用户选择  数量  获取硬币数量 int coinNum
                 // if button_OK  clicked 确认支付后，开始进入投币接收状态
-                ButtonInsert.Visibility = System.Windows.Visibility.Visible;
-                ButtonPlus.Visibility = System.Windows.Visibility.Visible;
-                ButtonMinus.Visibility = System.Windows.Visibility.Visible;
+                ContentViewStatus("LaunchFlyout");
                 switch (item)
                 {
                     case "360":
@@ -274,12 +273,14 @@ namespace TVM
             //else
             {
                 ContentViewStatus("FlyoutClosed");
+                FlyoutTool.IsPinned = false;
             }
         }
         
         private void CloseFlyout()
         {
-            FlyoutTool.IsOpen = false;
+            FlyoutTool.Dispatcher.Invoke(new Action(() => FlyoutTool.IsOpen=false));
+            //FlyoutTool.IsOpen = false;
         }
 
         private void ShowSettingsRight(object sender, RoutedEventArgs e)
@@ -301,7 +302,7 @@ namespace TVM
         private void Button_CoinHopper(object sender, RoutedEventArgs e) //我要退币
         {
             Hopper();
-            CloseFlyout();
+            CloseFlyout(); 
         }
 
         private void Button_start_insert(object sender, RoutedEventArgs e)
@@ -358,6 +359,12 @@ namespace TVM
                     IMAGE_FULLSOUND.Visibility = Visibility.Hidden;
                     IMAGE_360.Visibility = Visibility.Hidden;
                     IMAGE_VR.Visibility = Visibility.Hidden;
+                    break;
+                case "LaunchFlyout":
+                    ButtonInsert.Visibility = System.Windows.Visibility.Visible;
+                    ButtonPlus.Visibility = System.Windows.Visibility.Visible;
+                    ButtonMinus.Visibility = System.Windows.Visibility.Visible;
+                    FlyoutTool.CloseButtonVisibility = System.Windows.Visibility.Visible;
                     break;
                 default:
                     break;
@@ -538,6 +545,9 @@ namespace TVM
         }
         #endregion
 
+        #region 购票时间获取
+
+        #endregion
     }
 }
 
